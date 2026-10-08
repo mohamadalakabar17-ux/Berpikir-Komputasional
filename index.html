@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+<title>MISSION: BREAK IT DOWN! — Petualangan Berpikir Komputasional</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<style>
+:root {
+  --bg: #050816;
+  --bg-2: #0a1130;
+  --surface: rgba(15, 23, 60, 0.55);
+  --surface-2: rgba(20, 30, 70, 0.85);
+  --border: rgba(0, 229, 255, 0.18);
+  --border-strong: rgba(0, 229, 255, 0.5);
+  --text: #e7f0ff;
+  --muted: #8aa0c5;
+  --cyan: #00e5ff;
+  --pink: #ff2d75;
+  --lime: #39ff14;
+  --gold: #ffd700;
+  --orange: #ff6b35;
+  --purple: #b14dff;
+}
+html.light {
+  --bg: #eef3ff;
+  --bg-2: #dde6ff;
+  --surface: rgba(255, 255, 255, 0.75);
+  --surface-2: rgba(255, 255, 255, 0.95);
+  --border: rgba(0, 120, 200, 0.25);
+  --border-strong: rgba(0, 120, 200, 0.5);
+  --text: #0a1230;
+  --muted: #4a5b80;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.4s ease, color 0.4s ease;
+}
+.font-display { font-family: 'Orbitron', sans-serif; letter-spacing: 0.04em; }
+#particles, #confetti { position: fixed; inset: 0; pointer-events: none; }
+#particles { z-index: -2; }
+#three-bg { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: 0.55; }
+html.light #three-bg { opacity: 0.3; }
+
+/* ===== NAVBAR FIX ===== */
+.navbar {
+  position: sticky; top: 0; z-index: 50;
+  background: linear-gradient(180deg, rgba(5,8,22,0.95), rgba(5,8,22,0.7));
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-strong);
+  box-shadow: 0 4px 30px rgba(0,229,255,0.08);
+}
+html.light .navbar { background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8)); }
+
+.nav-wrap { max-width: 1400px; margin: 0 auto; padding: 10px 16px; display: flex; align-items: center; gap: 12px; }
+.nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; }
+.nav-logo-icon {
+  width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  box-shadow: 0 0 20px rgba(0,229,255,0.5);
+  transition: transform 0.3s;
+}
+.nav-logo:hover .nav-logo-icon { transform: rotate(10deg) scale(1.05); }
+.nav-logo-text { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 14px; line-height: 1.1; }
+.nav-logo-sub { font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); }
+
+.nav-menu { display: flex; align-items: center; gap: 4px; flex: 1; justify-content: center; }
+.nav-link {
+  position: relative; padding: 9px 14px; border-radius: 10px;
+  color: var(--muted); font-weight: 600; font-size: 13px;
+  transition: all 0.25s; cursor: pointer; white-space: nowrap;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-link i { font-size: 14px; }
+.nav-link:hover { color: var(--text); background: rgba(0,229,255,0.08); }
+.nav-link.active {
+  color: var(--cyan); background: rgba(0,229,255,0.12);
+  box-shadow: 0 0 20px rgba(0,229,255,0.2);
+}
+.nav-link.active::after {
+  content: ''; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 2px; background: var(--cyan); border-radius: 2px;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+.nav-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.nav-btn {
+  width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  background: var(--surface-2); border: 1px solid var(--border-strong); color: var(--text);
+  cursor: pointer; transition: all 0.25s; font-size: 15px;
+}
+.nav-btn:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-2px); }
+.nav-player {
+  display: flex; align-items: center; gap: 8px; padding: 6px 10px 6px 6px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--border-strong); cursor: pointer; transition: all 0.25s;
+}
+.nav-player:hover { border-color: var(--cyan); transform: translateY(-2px); }
+.nav-player-avatar {
+  width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--cyan), var(--purple)); color: white; font-size: 13px;
+}
+.nav-player-name { font-size: 13px; font-weight: 700; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-player-xp { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: var(--cyan); color: #001520; font-weight: 800; font-family: 'Orbitron', sans-serif; }
+
+/* Mobile navbar - horizontal scroll */
+@media (max-width: 1100px) {
+  .nav-menu { gap: 2px; padding: 0; }
+  .nav-link { padding: 8px 10px; font-size: 12px; }
+  .nav-link span { display: inline; }
+}
+@media (max-width: 900px) {
+  .nav-wrap { gap: 8px; padding: 8px 12px; }
+  .nav-logo-text { font-size: 12px; }
+  .nav-logo-sub { display: none; }
+  .nav-menu { overflow-x: auto; scrollbar-width: none; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
+  .nav-menu::-webkit-scrollbar { display: none; }
+  .nav-link { padding: 8px 12px; }
+  .nav-link span { display: none; }
+  .nav-link i { font-size: 16px; }
+  .nav-link.active::after { width: 16px; }
+  .nav-player-name { display: none; }
+}
+@media (max-width: 500px) {
+  .nav-logo-icon { width: 36px; height: 36px; }
+  .nav-logo-text { font-size: 11px; }
+  .nav-btn { width: 34px; height: 34px; font-size: 13px; }
+  .nav-player { padding: 4px 8px 4px 4px; }
+  .nav-player-avatar { width: 26px; height: 26px; font-size: 12px; }
+  .nav-player-xp { font-size: 10px; padding: 2px 6px; }
+}
+
+/* View transitions */
+.view { animation: viewIn 0.5s cubic-bezier(.2,.8,.2,1); }
+@keyframes viewIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.hidden { display: none !important; }
+
+/* Glass card */
+.glass {
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+html.light .glass { box-shadow: 0 10px 40px -10px rgba(0,50,150,0.15), inset 0 1px 0 rgba(255,255,255,0.5); }
+
+/* Neon button */
+.btn-neon {
+  position: relative; padding: 14px 28px; border-radius: 14px;
+  font-weight: 700; font-family: 'Orbitron', sans-serif; letter-spacing: 0.05em;
+  background: linear-gradient(135deg, var(--cyan), #0095ff);
+  color: #001a2b; border: none; cursor: pointer; overflow: hidden;
+  box-shadow: 0 0 30px rgba(0,229,255,0.45), 0 6px 20px rgba(0,0,0,0.3);
+  transition: all 0.3s; font-size: 15px;
+}
+.btn-neon:hover { transform: translateY(-3px); box-shadow: 0 0 50px rgba(0,229,255,0.7), 0 10px 30px rgba(0,0,0,0.4); }
+.btn-neon:active { transform: translateY(-1px); }
+.btn-neon.pink { background: linear-gradient(135deg, var(--pink), #c91860); color: white; box-shadow: 0 0 30px rgba(255,45,117,0.45), 0 6px 20px rgba(0,0,0,0.3); }
+.btn-neon.pink:hover { box-shadow: 0 0 50px rgba(255,45,117,0.7), 0 10px 30px rgba(0,0,0,0.4); }
+.btn-neon.lime { background: linear-gradient(135deg, var(--lime), #00c20a); color: #001a00; box-shadow: 0 0 30px rgba(57,255,20,0.45), 0 6px 20px rgba(0,0,0,0.3); }
+.btn-neon.gold { background: linear-gradient(135deg, var(--gold), #ff9500); color: #2a1500; box-shadow: 0 0 30px rgba(255,215,0,0.45), 0 6px 20px rgba(0,0,0,0.3); }
+.btn-ghost {
+  padding: 12px 22px; border-radius: 14px; font-weight: 700; cursor: pointer;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border-strong);
+  transition: all 0.25s; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px;
+}
+.btn-ghost:hover { background: rgba(0,229,255,0.1); border-color: var(--cyan); transform: translateY(-2px); }
+
+/* Hero title glow */
+.hero-title {
+  font-family: 'Orbitron', sans-serif; font-weight: 900;
+  background: linear-gradient(180deg, #ffffff 0%, var(--cyan) 60%, #0095ff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: 0 0 80px rgba(0,229,255,0.4);
+  filter: drop-shadow(0 4px 30px rgba(0,229,255,0.35));
+  letter-spacing: 0.02em; line-height: 1;
+}
+
+/* Floating robot */
+.robot { width: 220px; height: 280px; position: relative; animation: floatBob 4s ease-in-out infinite; }
+@keyframes floatBob { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-20px) rotate(2deg); } }
+.robot-head {
+  width: 140px; height: 110px; margin: 0 auto;
+  background: linear-gradient(180deg, #1a2855, #0f1840);
+  border: 2px solid var(--cyan); border-radius: 28px;
+  position: relative; box-shadow: 0 0 40px rgba(0,229,255,0.5), inset 0 -10px 30px rgba(0,0,0,0.5);
+}
+.robot-eye {
+  position: absolute; top: 35px; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--cyan); box-shadow: 0 0 20px var(--cyan), inset 0 0 8px white;
+  animation: blink 4s infinite;
+}
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+.robot-eye.left { left: 28px; } .robot-eye.right { right: 28px; }
+.robot-mouth {
+  position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+  width: 60px; height: 6px; background: var(--pink); border-radius: 3px;
+  box-shadow: 0 0 15px var(--pink);
+}
+.robot-antenna {
+  position: absolute; top: -22px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 24px; background: var(--cyan);
+}
+.robot-antenna::after {
+  content: ''; position: absolute; top: -8px; left: -6px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--pink); box-shadow: 0 0 20px var(--pink);
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.7; } }
+.robot-body {
+  width: 160px; height: 130px; margin: 10px auto 0;
+  background: linear-gradient(180deg, #1a2855, #0f1840);
+  border: 2px solid var(--cyan); border-radius: 24px 24px 30px 30px;
+  position: relative; box-shadow: 0 0 40px rgba(0,229,255,0.4);
+}
+.robot-chest {
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+  width: 50px; height: 50px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  box-shadow: 0 0 30px var(--pink); animation: pulse 2s infinite;
+}
+.robot-arm {
+  position: absolute; top: 10px; width: 18px; height: 80px;
+  background: linear-gradient(180deg, #1a2855, #0f1840);
+  border: 2px solid var(--cyan); border-radius: 10px;
+}
+.robot-arm.left { left: -20px; transform: rotate(-10deg); }
+.robot-arm.right { right: -20px; transform: rotate(10deg); animation: wave 2s infinite; }
+@keyframes wave { 0%,100% { transform: rotate(10deg); } 50% { transform: rotate(-30deg); } }
+
+/* Floating cards */
+.floating-card {
+  position: absolute; padding: 10px 16px; border-radius: 12px;
+  background: var(--surface); backdrop-filter: blur(12px);
+  border: 1px solid var(--border-strong); font-size: 13px; font-weight: 600;
+  box-shadow: 0 0 30px rgba(0,229,255,0.2);
+  animation: floatCard 6s ease-in-out infinite; z-index: 5;
+}
+@keyframes floatCard { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-15px) rotate(3deg); } }
+
+/* World card */
+.world-card {
+  position: relative; padding: 24px; border-radius: 24px;
+  background: var(--surface); backdrop-filter: blur(14px);
+  border: 1px solid var(--border); overflow: hidden; cursor: pointer;
+  transition: all 0.4s cubic-bezier(.2,.8,.2,1);
+  transform-style: preserve-3d;
+}
+.world-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--accent-color, var(--cyan)) 0%, transparent 50%);
+  opacity: 0.15; transition: opacity 0.4s;
+}
+.world-card:hover { transform: translateY(-8px) rotateX(5deg); border-color: var(--accent-color, var(--cyan)); box-shadow: 0 20px 50px -10px var(--accent-color, var(--cyan)); }
+.world-card:hover::before { opacity: 0.3; }
+.world-card.locked { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.6); }
+.world-card.locked:hover { transform: none; box-shadow: none; }
+.world-icon {
+  width: 70px; height: 70px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+  font-size: 32px; background: var(--surface-2); margin-bottom: 14px;
+  box-shadow: 0 0 30px var(--accent-color, var(--cyan));
+  border: 1px solid var(--accent-color, var(--cyan));
+}
+
+/* Progress bar */
+.progress-bar { height: 10px; background: rgba(0,0,0,0.4); border-radius: 5px; overflow: hidden; position: relative; }
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--cyan), var(--lime));
+  border-radius: 5px; transition: width 0.6s cubic-bezier(.2,.8,.2,1);
+  box-shadow: 0 0 15px var(--cyan); position: relative;
+}
+.progress-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+/* Energy bar */
+.energy-bar { display: inline-flex; align-items: center; gap: 6px; }
+.energy-cell { width: 10px; height: 16px; border-radius: 3px; background: rgba(255,255,255,0.15); }
+.energy-cell.full { background: var(--lime); box-shadow: 0 0 8px var(--lime); }
+
+/* Drag and drop */
+.drag-item {
+  padding: 14px 18px; border-radius: 14px; background: var(--surface-2);
+  border: 1px solid var(--border-strong); cursor: grab; user-select: none;
+  font-weight: 600; transition: all 0.2s; touch-action: none;
+  display: flex; align-items: center; gap: 10px;
+}
+.drag-item:hover { border-color: var(--cyan); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,229,255,0.2); }
+.drag-item:active, .drag-item.dragging { cursor: grabbing; opacity: 0.5; transform: scale(0.95); }
+.drag-item.placed { opacity: 0.4; pointer-events: none; }
+.drop-zone {
+  min-height: 80px; border: 2px dashed var(--border-strong); border-radius: 16px;
+  padding: 14px; transition: all 0.3s; background: rgba(0,0,0,0.2);
+}
+.drop-zone.over { border-color: var(--cyan); background: rgba(0,229,255,0.1); box-shadow: 0 0 30px rgba(0,229,255,0.3) inset; }
+
+/* Pattern option */
+.pattern-option {
+  padding: 20px; border-radius: 16px; background: var(--surface-2);
+  border: 2px solid var(--border); cursor: pointer; transition: all 0.25s;
+  font-size: 32px; text-align: center; font-weight: 700;
+}
+.pattern-option:hover { border-color: var(--cyan); transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,229,255,0.25); }
+.pattern-option.correct { border-color: var(--lime); background: rgba(57,255,20,0.15); animation: bounce 0.5s; }
+.pattern-option.wrong { border-color: var(--pink); background: rgba(255,45,117,0.15); animation: shake 0.4s; }
+@keyframes bounce { 0%,100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+
+/* Pattern sequence */
+.pattern-seq { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.pattern-item {
+  width: 70px; height: 70px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+  font-size: 36px; background: var(--surface-2); border: 2px solid var(--border-strong);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3); animation: popIn 0.4s;
+}
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+.pattern-item.question { border-color: var(--gold); box-shadow: 0 0 30px rgba(255,215,0,0.5); animation: pulseGold 1.5s infinite; }
+@keyframes pulseGold { 0%,100% { box-shadow: 0 0 20px rgba(255,215,0,0.4); } 50% { box-shadow: 0 0 40px rgba(255,215,0,0.8); } }
+
+/* Step card */
+.step-card {
+  padding: 14px 18px; border-radius: 14px; background: var(--surface-2);
+  border: 1px solid var(--border-strong); cursor: grab; user-select: none;
+  display: flex; align-items: center; gap: 12px; transition: all 0.2s; touch-action: none;
+}
+.step-card:hover { border-color: var(--cyan); transform: translateX(4px); }
+.step-card.dragging { opacity: 0.4; }
+.step-number {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; color: white; font-family: 'Orbitron', sans-serif;
+}
+.step-list-slot {
+  min-height: 60px; border: 2px dashed var(--border-strong); border-radius: 14px;
+  padding: 10px; transition: all 0.3s; display: flex; align-items: center; gap: 12px;
+}
+.step-list-slot.over { border-color: var(--cyan); background: rgba(0,229,255,0.08); }
+
+/* Toast */
+#toast-container { position: fixed; top: 80px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; max-width: 360px; }
+.toast {
+  padding: 14px 18px; border-radius: 14px; background: var(--surface-2); backdrop-filter: blur(16px);
+  border: 1px solid var(--border-strong); box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  animation: toastIn 0.4s, toastOut 0.4s 3s forwards; display: flex; align-items: center; gap: 12px;
+  font-weight: 600; font-size: 14px;
+}
+@keyframes toastIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastOut { to { transform: translateX(120%); opacity: 0; } }
+.toast.success { border-color: var(--lime); color: var(--lime); }
+.toast.error { border-color: var(--pink); color: var(--pink); }
+.toast.info { border-color: var(--cyan); color: var(--cyan); }
+.toast.warning { border-color: var(--gold); color: var(--gold); }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 999; background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center;
+  padding: 20px; animation: fadeIn 0.3s;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-content {
+  background: var(--bg-2); border: 1px solid var(--border-strong); border-radius: 24px;
+  padding: 32px; max-width: 540px; width: 100%; max-height: 90vh; overflow-y: auto;
+  animation: modalIn 0.5s cubic-bezier(.2,.8,.2,1); position: relative;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(0,229,255,0.2);
+}
+@keyframes modalIn { from { transform: scale(0.85) translateY(40px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+
+/* XP badge animation */
+.xp-pop {
+  position: fixed; pointer-events: none; z-index: 999;
+  font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 24px;
+  color: var(--lime); text-shadow: 0 0 20px var(--lime);
+  animation: xpPop 1.5s forwards;
+}
+@keyframes xpPop {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-100px) scale(1); opacity: 0; }
+}
+
+/* Badge */
+.badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px;
+  border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border-strong);
+  font-weight: 700; font-size: 13px;
+}
+.badge.earned { border-color: var(--gold); background: rgba(255,215,0,0.1); box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+
+/* Star rating */
+.star { font-size: 28px; color: rgba(255,255,255,0.15); transition: all 0.3s; }
+.star.filled { color: var(--gold); text-shadow: 0 0 15px var(--gold); animation: starPop 0.5s; }
+@keyframes starPop { 0% { transform: scale(0) rotate(-180deg); } 100% { transform: scale(1) rotate(0); } }
+
+/* Timer */
+.timer-display {
+  font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 24px;
+  padding: 8px 16px; border-radius: 12px; background: var(--surface-2);
+  border: 1px solid var(--border-strong); color: var(--cyan);
+  box-shadow: 0 0 20px rgba(0,229,255,0.2);
+}
+.timer-display.warning { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+.timer-display.danger { color: var(--pink); border-color: var(--pink); animation: pulse 1s infinite; }
+
+/* Input fields */
+.input-field {
+  width: 100%; padding: 12px 16px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--border-strong);
+  color: var(--text); font-family: inherit; font-size: 14px; transition: all 0.25s;
+}
+.input-field:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 20px rgba(0,229,255,0.25); }
+.input-field::placeholder { color: var(--muted); }
+textarea.input-field { resize: vertical; min-height: 80px; }
+
+/* Table */
+.data-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+.data-table th {
+  background: var(--surface-2); padding: 12px 16px; text-align: left;
+  font-weight: 700; color: var(--cyan); border-bottom: 1px solid var(--border-strong);
+  position: sticky; top: 0;
+}
+.data-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+.data-table tr:hover td { background: rgba(0,229,255,0.05); }
+
+/* Print */
+@media print {
+  body * { visibility: hidden; }
+  #print-area, #print-area * { visibility: visible; }
+  #print-area { position: absolute; left: 0; top: 0; width: 100%; padding: 20mm; background: white; color: black; }
+  .no-print { display: none !important; }
+  @page { size: A4 portrait; margin: 10mm; }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+#confetti { z-index: 998; pointer-events: none; }
+
+/* Achievement */
+.achievement {
+  padding: 16px; border-radius: 16px; background: var(--surface-2);
+  border: 1px solid var(--border); text-align: center; transition: all 0.3s;
+}
+.achievement.earned { border-color: var(--gold); background: linear-gradient(135deg, rgba(255,215,0,0.15), transparent); box-shadow: 0 0 25px rgba(255,215,0,0.2); }
+.achievement.locked { opacity: 0.4; filter: grayscale(0.8); }
+.achievement-icon { font-size: 36px; margin-bottom: 8px; }
+
+/* Flow arrow */
+.flow-arrow { display: flex; align-items: center; justify-content: center; color: var(--cyan); font-size: 20px; margin: 4px 0; animation: arrowPulse 2s infinite; }
+@keyframes arrowPulse { 0%,100% { opacity: 0.5; transform: translateY(0); } 50% { opacity: 1; transform: translateY(4px); } }
+
+/* Glow text */
+.glow-cyan { text-shadow: 0 0 20px var(--cyan); }
+.glow-pink { text-shadow: 0 0 20px var(--pink); }
+.glow-gold { text-shadow: 0 0 20px var(--gold); }
+.glow-lime { text-shadow: 0 0 20px var(--lime); }
+
+/* Tab buttons */
+.tab-btn {
+  padding: 10px 18px; border-radius: 12px; font-weight: 700; cursor: pointer;
+  background: transparent; color: var(--muted); border: 1px solid transparent;
+  transition: all 0.2s; font-size: 14px;
+}
+.tab-btn.active { background: var(--surface-2); color: var(--cyan); border-color: var(--border-strong); }
+.tab-btn:hover:not(.active) { color: var(--text); }
+
+@media (max-width: 640px) {
+  .hero-title { font-size: 42px !important; }
+  .pattern-item { width: 50px; height: 50px; font-size: 26px; }
+  .robot { transform: scale(0.75); }
+}
+
+/* ===== ADMIN LOGIN PAGE ===== */
+.admin-login-page {
+  min-height: calc(100vh - 70px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; position: relative; overflow: hidden;
+}
+.admin-login-card {
+  position: relative; z-index: 2; width: 100%; max-width: 440px;
+  background: var(--surface); backdrop-filter: blur(20px);
+  border: 1px solid var(--border-strong); border-radius: 24px;
+  padding: 40px 36px; box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 60px rgba(0,229,255,0.15);
+}
+.admin-login-icon {
+  width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  box-shadow: 0 0 40px rgba(0,229,255,0.5); font-size: 36px; color: white;
+  animation: pulse 2s infinite;
+}
+.admin-login-title { font-family: 'Orbitron', sans-serif; font-weight: 900; font-size: 24px; text-align: center; margin-bottom: 8px; }
+.admin-login-sub { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+.admin-input-group { margin-bottom: 16px; }
+.admin-input-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 6px; display: block; }
+.admin-input-wrap { position: relative; }
+.admin-input-wrap i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; }
+.admin-input-wrap .input-field { padding-left: 42px; }
+.admin-demo-box {
+  margin-top: 20px; padding: 12px 16px; border-radius: 12px;
+  background: rgba(0,229,255,0.08); border: 1px dashed var(--border-strong);
+  font-size: 12px; color: var(--muted); text-align: center;
+}
+.admin-demo-box strong { color: var(--cyan); }
+.admin-back-link { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; color: var(--muted); font-size: 13px; cursor: pointer; transition: color 0.2s; }
+.admin-back-link:hover { color: var(--cyan); }
+
+.login-particle { position: absolute; border-radius: 50%; pointer-events: none; }
+
+/* Grid background */
+.grid-bg {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0.15;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.3) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div id="three-bg"></div>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar no-print">
+  <div class="nav-wrap">
+    <div class="nav-logo" onclick="go('landing')">
+      <div class="nav-logo-icon"><i class="fa-solid fa-cube text-white text-lg"></i></div>
+      <div>
+        <div class="nav-logo-text">BREAK IT DOWN</div>
+        <div class="nav-logo-sub">Computational City</div>
+      </div>
+    </div>
+    <div class="nav-menu">
+      <div class="nav-link" data-nav="landing" onclick="go('landing')"><i class="fa-solid fa-house"></i><span>Beranda</span></div>
+      <div class="nav-link" data-nav="dashboard" onclick="go('dashboard')"><i class="fa-solid fa-gamepad"></i><span>Game</span></div>
+      <div class="nav-link" data-nav="materi" onclick="go('materi')"><i class="fa-solid fa-book"></i><span>Materi</span></div>
+      <div class="nav-link" data-nav="lkpd" onclick="go('lkpd')"><i class="fa-solid fa-clipboard"></i><span>LKPD</span></div>
+      <div class="nav-link" data-nav="penilaian" onclick="go('penilaian')"><i class="fa-solid fa-chart-bar"></i><span>Penilaian</span></div>
+      <div class="nav-link" data-nav="prestasi" onclick="go('prestasi')"><i class="fa-solid fa-trophy"></i><span>Prestasi</span></div>
+      <div class="nav-link" data-nav="guru" onclick="go('guru')"><i class="fa-solid fa-user-tie"></i><span>Guru</span></div>
+    </div>
+    <div class="nav-actions">
+      <button onclick="toggleDark()" class="nav-btn" title="Mode terang/gelap">
+        <i class="fa-solid fa-moon" id="darkIcon"></i>
+      </button>
+      <button onclick="toggleSound()" class="nav-btn" title="Suara">
+        <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+      </button>
+      <div class="nav-player" onclick="go('dashboard')">
+        <div class="nav-player-avatar"><i class="fa-solid fa-user-astronaut"></i></div>
+        <span class="nav-player-name" id="navPlayerName">Tamu</span>
+        <span class="nav-player-xp" id="navXP">0 XP</span>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main id="app">
+
+<!-- ===== VIEW: LANDING ===== -->
+<section id="view-landing" class="view">
+  <div class="relative min-h-[calc(100vh-70px)] flex items-center justify-center px-4 py-12 overflow-hidden">
+    <div class="floating-card" style="top:18%;left:6%;animation-delay:0s"><i class="fa-solid fa-puzzle-piece" style="color:var(--cyan)"></i> Dekomposisi</div>
+    <div class="floating-card" style="top:25%;right:8%;animation-delay:1.5s"><i class="fa-solid fa-magnifying-glass" style="color:var(--pink)"></i> Pola</div>
+    <div class="floating-card" style="bottom:30%;left:10%;animation-delay:3s"><i class="fa-solid fa-bullseye" style="color:var(--lime)"></i> Abstraksi</div>
+    <div class="floating-card" style="bottom:22%;right:6%;animation-delay:2s"><i class="fa-solid fa-gears" style="color:var(--gold)"></i> Algoritma</div>
+
+    <div class="max-w-7xl w-full grid lg:grid-cols-2 gap-12 items-center relative z-10">
+      <div class="text-center lg:text-left">
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-6" style="background:var(--surface);border:1px solid var(--border-strong)">
+          <span class="w-2 h-2 rounded-full" style="background:var(--lime);box-shadow:0 0 10px var(--lime);animation:pulse 1.5s infinite"></span>
+          <span class="text-xs font-bold uppercase tracking-widest" style="color:var(--lime)">Informatika SMP Kelas 7</span>
+        </div>
+        <h1 class="hero-title text-5xl md:text-7xl lg:text-8xl font-black mb-4">MISSION:<br/>BREAK IT<br/>DOWN!</h1>
+        <p class="text-base md:text-lg mb-2 font-display tracking-wide" style="color:var(--cyan)">Petualangan Berpikir Komputasional</p>
+        <p class="text-sm md:text-base mb-8 max-w-xl mx-auto lg:mx-0" style="color:var(--muted)">
+          "Masalah besar terlihat sulit. Pecah menjadi bagian kecil, temukan polanya, fokus pada hal penting, lalu susun langkah penyelesaiannya!"
+        </p>
+        <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
+          <button class="btn-neon" onclick="go('dashboard')"><i class="fa-solid fa-rocket mr-2"></i>MULAI PETUALANGAN</button>
+          <button class="btn-ghost" onclick="go('materi')"><i class="fa-solid fa-book mr-2"></i>PELAJARI MATERI</button>
+          <button class="btn-ghost" onclick="go('lkpd')"><i class="fa-solid fa-clipboard mr-2"></i>LKPD</button>
+          <button class="btn-ghost" onclick="go('penilaian')"><i class="fa-solid fa-trophy mr-2"></i>NILAI & RUBRIK</button>
+        </div>
+        <div class="mt-8 flex gap-6 justify-center lg:justify-start text-xs flex-wrap" style="color:var(--muted)">
+          <div><i class="fa-solid fa-users mr-1"></i> Individual / Kelompok</div>
+          <div><i class="fa-solid fa-clock mr-1"></i> ± 90 Menit</div>
+          <div><i class="fa-solid fa-cube mr-1"></i> 4 World + Final</div>
+        </div>
+      </div>
+
+      <div class="relative flex justify-center">
+        <div class="robot">
+          <div class="robot-head">
+            <div class="robot-antenna"></div>
+            <div class="robot-eye left"></div>
+            <div class="robot-eye right"></div>
+            <div class="robot-mouth"></div>
+          </div>
+          <div class="robot-body">
+            <div class="robot-chest"></div>
+            <div class="robot-arm left"></div>
+            <div class="robot-arm right"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="absolute bottom-4 left-0 right-0 px-4 hidden md:block">
+      <div class="max-w-5xl mx-auto glass p-5 grid grid-cols-4 gap-4">
+        <div class="text-center"><div class="font-display font-black text-2xl glow-cyan" style="color:var(--cyan)">04</div><div class="text-xs" style="color:var(--muted)">World Game</div></div>
+        <div class="text-center"><div class="font-display font-black text-2xl glow-gold" style="color:var(--gold)">06</div><div class="text-xs" style="color:var(--muted)">Level Siswa</div></div>
+        <div class="text-center"><div class="font-display font-black text-2xl glow-lime" style="color:var(--lime)">05</div><div class="text-xs" style="color:var(--muted)">Badge Achievement</div></div>
+        <div class="text-center"><div class="font-display font-black text-2xl glow-pink" style="color:var(--pink)">1000</div><div class="text-xs" style="color:var(--muted)">XP Maksimal</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: DASHBOARD ===== -->
+<section id="view-dashboard" class="view hidden">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="glass p-6 mb-6">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-3">
+        <div>
+          <h2 class="font-display text-2xl font-black mb-1">DASHBOARD PEMAIN</h2>
+          <p style="color:var(--muted)" class="text-sm">Selamat datang di Computational City, Problem Solver!</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="badge" id="badgeLevel"><i class="fa-solid fa-shield"></i> Level 1</span>
+          <span class="badge earned" id="badgeStreak"><i class="fa-solid fa-fire" style="color:var(--orange)"></i> <span id="streakText">0</span> Streak</span>
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-4 mb-5" id="playerSetup">
+        <div>
+          <label class="text-xs font-bold uppercase tracking-wider mb-2 block" style="color:var(--muted)">Nama Siswa</label>
+          <input type="text" class="input-field" id="inpName" placeholder="Masukkan nama..." />
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-wider mb-2 block" style="color:var(--muted)">Kelas</label>
+          <select class="input-field" id="inpClass">
+            <option value="">Pilih kelas...</option>
+            <option>VII A</option><option>VII B</option><option>VII C</option><option>VII D</option><option>VII E</option><option>VII F</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs font-bold uppercase tracking-wider mb-2 block" style="color:var(--muted)">Kelompok</label>
+          <input type="text" class="input-field" id="inpGroup" placeholder="Contoh: Kelompok 1" />
+        </div>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-4">
+        <div class="glass p-4">
+          <div class="text-xs uppercase tracking-wider mb-1" style="color:var(--muted)">XP</div>
+          <div class="font-display font-black text-2xl glow-cyan" style="color:var(--cyan)"><span id="statXP">0</span> <span class="text-sm" style="color:var(--muted)">/ 1000</span></div>
+          <div class="progress-bar mt-2"><div class="progress-fill" id="xpBar" style="width:0%"></div></div>
+        </div>
+        <div class="glass p-4">
+          <div class="text-xs uppercase tracking-wider mb-1" style="color:var(--muted)">Skor</div>
+          <div class="font-display font-black text-2xl glow-gold" style="color:var(--gold)" id="statScore">0</div>
+          <div class="text-xs mt-2" style="color:var(--muted)">Total poin</div>
+        </div>
+        <div class="glass p-4">
+          <div class="text-xs uppercase tracking-wider mb-1" style="color:var(--muted)">Bintang</div>
+          <div class="flex gap-1 mt-1">
+            <span class="star" id="star1">★</span><span class="star" id="star2">★</span><span class="star" id="star3">★</span>
+          </div>
+          <div class="text-xs mt-2" style="color:var(--muted)"><span id="starCount">0</span>/3 bintang</div>
+        </div>
+        <div class="glass p-4">
+          <div class="text-xs uppercase tracking-wider mb-1" style="color:var(--muted)">Energy</div>
+          <div class="energy-bar mt-2" id="energyBar"></div>
+          <div class="text-xs mt-2" style="color:var(--muted)"><span id="energyVal">100</span>/100 energy</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="font-display text-xl font-black mb-4 flex items-center gap-2"><i class="fa-solid fa-map" style="color:var(--cyan)"></i> PETA DUNIA — COMPUTATIONAL CITY</h3>
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="world-card" style="--accent-color:var(--cyan)" onclick="openWorld(1)">
+        <div class="world-icon"><i class="fa-solid fa-puzzle-piece" style="color:var(--cyan)"></i></div>
+        <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--cyan)">World 1</div>
+        <div class="font-display font-black text-xl mb-2">DEKOMPOSISI</div>
+        <p class="text-sm mb-3" style="color:var(--muted)">Pecahkan masalah besar menjadi bagian kecil yang lebih mudah diselesaikan.</p>
+        <div class="flex items-center justify-between text-xs">
+          <span style="color:var(--muted)"><i class="fa-solid fa-star" style="color:var(--gold)"></i> <span id="w1stars">0</span>/3</span>
+          <span style="color:var(--cyan)" id="w1status">TERBUKA</span>
+        </div>
+      </div>
+      <div class="world-card locked" style="--accent-color:var(--pink)" id="wc2" onclick="openWorld(2)">
+        <div class="world-icon"><i class="fa-solid fa-magnifying-glass" style="color:var(--pink)"></i></div>
+        <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--pink)">World 2</div>
+        <div class="font-display font-black text-xl mb-2">PENGENALAN POLA</div>
+        <p class="text-sm mb-3" style="color:var(--muted)">Temukan pola berulang dari suatu masalah untuk memprediksi solusi.</p>
+        <div class="flex items-center justify-between text-xs">
+          <span style="color:var(--muted)"><i class="fa-solid fa-star" style="color:var(--gold)"></i> <span id="w2stars">0</span>/3</span>
+          <span style="color:var(--muted)"><i class="fa-solid fa-lock"></i> TERKUNCI</span>
+        </div>
+      </div>
+      <div class="world-card locked" style="--accent-color:var(--lime)" id="wc3" onclick="openWorld(3)">
+        <div class="world-icon"><i class="fa-solid fa-bullseye" style="color:var(--lime)"></i></div>
+        <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--lime)">World 3</div>
+        <div class="font-display font-black text-xl mb-2">ABSTRAKSI</div>
+        <p class="text-sm mb-3" style="color:var(--muted)">Fokus pada informasi penting dan abaikan yang tidak diperlukan.</p>
+        <div class="flex items-center justify-between text-xs">
+          <span style="color:var(--muted)"><i class="fa-solid fa-star" style="color:var(--gold)"></i> <span id="w3stars">0</span>/3</span>
+          <span style="color:var(--muted)"><i class="fa-solid fa-lock"></i> TERKUNCI</span>
+        </div>
+      </div>
+      <div class="world-card locked" style="--accent-color:var(--gold)" id="wc4" onclick="openWorld(4)">
+        <div class="world-icon"><i class="fa-solid fa-gears" style="color:var(--gold)"></i></div>
+        <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--gold)">World 4</div>
+        <div class="font-display font-black text-xl mb-2">ALGORITMA</div>
+        <p class="text-sm mb-3" style="color:var(--muted)">Susun langkah terurut dan sistematis untuk menyelesaikan masalah.</p>
+        <div class="flex items-center justify-between text-xs">
+          <span style="color:var(--muted)"><i class="fa-solid fa-star" style="color:var(--gold)"></i> <span id="w4stars">0</span>/3</span>
+          <span style="color:var(--muted)"><i class="fa-solid fa-lock"></i> TERKUNCI</span>
+        </div>
+      </div>
+      <div class="world-card locked" style="--accent-color:var(--purple)" id="wc5" onclick="openWorld(5)">
+        <div class="world-icon"><i class="fa-solid fa-trophy" style="color:var(--purple)"></i></div>
+        <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--purple)">Final Mission</div>
+        <div class="font-display font-black text-xl mb-2">MASTER PROBLEM SOLVER</div>
+        <p class="text-sm mb-3" style="color:var(--muted)">Gabungkan keempat konsep untuk menyelesaikan misi terbesar!</p>
+        <div class="flex items-center justify-between text-xs">
+          <span style="color:var(--muted)"><i class="fa-solid fa-crown" style="color:var(--gold)"></i> +500 XP</span>
+          <span style="color:var(--muted)"><i class="fa-solid fa-lock"></i> TERKUNCI</span>
+        </div>
+      </div>
+      <div class="world-card" style="--accent-color:var(--orange)" onclick="go('prestasi')">
+        <div class="world-icon"><i class="fa-solid fa-medal" style="color:var(--orange)"></i></div>
+        <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--orange)">Hall of Fame</div>
+        <div class="font-display font-black text-xl mb-2">PRESTASI</div>
+        <p class="text-sm mb-3" style="color:var(--muted)">Lihat semua badge dan pencapaian yang telah kamu dapatkan.</p>
+        <div class="flex items-center justify-between text-xs">
+          <span style="color:var(--muted)"><span id="badgeCount">0</span>/5 badge</span>
+          <span style="color:var(--orange)">LIHAT →</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: WORLD 1 ===== -->
+<section id="view-world1" class="view hidden">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <button onclick="go('dashboard')" class="btn-ghost mb-4"><i class="fa-solid fa-arrow-left mr-2"></i>Kembali ke Dashboard</button>
+    <div class="glass p-6 mb-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="world-icon" style="--accent-color:var(--cyan);margin:0;width:60px;height:60px;font-size:26px"><i class="fa-solid fa-puzzle-piece" style="color:var(--cyan)"></i></div>
+        <div>
+          <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--cyan)">World 1</div>
+          <h2 class="font-display text-3xl font-black">DEKOMPOSISI</h2>
+        </div>
+      </div>
+      <p style="color:var(--muted)" class="text-sm">Dekomposisi adalah proses memecah masalah besar menjadi beberapa masalah kecil agar lebih mudah diselesaikan. Seret kartu yang merupakan bagian dari masalah utama ke dalam kotak masalah!</p>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-6">
+      <div class="glass p-6">
+        <h3 class="font-display font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-box-archive" style="color:var(--cyan)"></i> KARTU MASALAH</h3>
+        <p class="text-xs mb-4" style="color:var(--muted)">Seret kartu yang merupakan bagian dari "Menyelenggarakan Acara Sekolah" ke kotak sebelah kanan.</p>
+        <div class="space-y-2" id="decItems"></div>
+      </div>
+      <div class="glass p-6">
+        <h3 class="font-display font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-bullseye" style="color:var(--pink)"></i> MASALAH BESAR</h3>
+        <div class="rounded-2xl p-4 mb-4 text-center" style="background:linear-gradient(135deg,rgba(255,45,117,0.15),rgba(177,77,255,0.1));border:2px solid var(--pink)">
+          <div class="text-xs uppercase tracking-widest font-bold mb-1" style="color:var(--pink)">Masalah Utama</div>
+          <div class="font-display font-black text-xl">MENYELENGGARAKAN ACARA SEKOLAH</div>
+        </div>
+        <div class="drop-zone" id="decDrop">
+          <div class="text-center text-sm py-4" style="color:var(--muted)">Drop kartu di sini untuk memecah masalah...</div>
+        </div>
+        <div class="mt-4 flex justify-between items-center">
+          <div class="text-xs" style="color:var(--muted)">Benar: <span id="decCorrect" style="color:var(--lime);font-weight:700">0</span>/<span id="decTotal">8</span></div>
+          <button class="btn-neon" onclick="checkDecomposition()"><i class="fa-solid fa-check mr-2"></i>PERIKSA JAWABAN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: WORLD 2 ===== -->
+<section id="view-world2" class="view hidden">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <button onclick="go('dashboard')" class="btn-ghost mb-4"><i class="fa-solid fa-arrow-left mr-2"></i>Kembali ke Dashboard</button>
+    <div class="glass p-6 mb-6">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+          <div class="world-icon" style="--accent-color:var(--pink);margin:0;width:60px;height:60px;font-size:26px"><i class="fa-solid fa-magnifying-glass" style="color:var(--pink)"></i></div>
+          <div>
+            <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--pink)">World 2</div>
+            <h2 class="font-display text-3xl font-black">PENGENALAN POLA</h2>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-xs" style="color:var(--muted)">Level <span id="patLevel" style="color:var(--cyan);font-weight:700">1</span>/6</div>
+          <div class="timer-display" id="patTimer">00:30</div>
+        </div>
+      </div>
+      <p style="color:var(--muted)" class="text-sm mt-3">Perhatikan pola yang muncul, lalu pilih jawaban yang tepat untuk melanjutkan pola!</p>
+    </div>
+    <div class="glass p-8 mb-6 text-center">
+      <div class="text-xs uppercase tracking-widest font-bold mb-4" style="color:var(--pink)" id="patTitle">POLA WARNA</div>
+      <div class="pattern-seq" id="patSequence"></div>
+      <div class="mt-4 text-sm" style="color:var(--muted)">Apa yang muncul berikutnya?</div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" id="patOptions"></div>
+    <div class="glass p-4" id="patExplain" style="display:none">
+      <div class="flex items-start gap-3">
+        <i class="fa-solid fa-lightbulb text-2xl" style="color:var(--gold)"></i>
+        <div>
+          <div class="font-bold mb-1">Penjelasan</div>
+          <div class="text-sm" style="color:var(--muted)" id="patExplainText"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: WORLD 3 ===== -->
+<section id="view-world3" class="view hidden">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <button onclick="go('dashboard')" class="btn-ghost mb-4"><i class="fa-solid fa-arrow-left mr-2"></i>Kembali ke Dashboard</button>
+    <div class="glass p-6 mb-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="world-icon" style="--accent-color:var(--lime);margin:0;width:60px;height:60px;font-size:26px"><i class="fa-solid fa-bullseye" style="color:var(--lime)"></i></div>
+        <div>
+          <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--lime)">World 3</div>
+          <h2 class="font-display text-3xl font-black">ABSTRAKSI</h2>
+        </div>
+      </div>
+      <p style="color:var(--muted)" class="text-sm">Abstraksi berarti memusatkan perhatian pada informasi penting dan mengabaikan informasi yang tidak diperlukan. Pilih informasi yang benar-benar penting untuk menyelesaikan masalah!</p>
+    </div>
+    <div class="glass p-6 mb-6 text-center">
+      <div class="text-xs uppercase tracking-widest font-bold mb-2" style="color:var(--lime)">SKENARIO</div>
+      <div class="font-display font-black text-xl md:text-2xl">"Kamu ingin pergi dari sekolah ke perpustakaan."</div>
+      <div class="text-sm mt-2" style="color:var(--muted)">Pilih informasi yang PENTING dan buang yang TIDAK PENTING!</div>
+    </div>
+    <div class="grid lg:grid-cols-3 gap-5">
+      <div class="glass p-5">
+        <h3 class="font-display font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-list" style="color:var(--cyan)"></i> INFORMASI</h3>
+        <div class="space-y-2" id="absItems"></div>
+      </div>
+      <div class="glass p-5">
+        <h3 class="font-display font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-circle-check" style="color:var(--lime)"></i> PENTING</h3>
+        <div class="drop-zone min-h-[200px]" id="absDropImportant" style="border-color:var(--lime)"></div>
+      </div>
+      <div class="glass p-5">
+        <h3 class="font-display font-bold mb-3 flex items-center gap-2"><i class="fa-solid fa-circle-xmark" style="color:var(--pink)"></i> TIDAK PENTING</h3>
+        <div class="drop-zone min-h-[200px]" id="absDropNotImportant" style="border-color:var(--pink)"></div>
+      </div>
+    </div>
+    <div class="mt-6 flex justify-end">
+      <button class="btn-neon lime" onclick="checkAbstraction()"><i class="fa-solid fa-check mr-2"></i>PERIKSA JAWABAN</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: WORLD 4 ===== -->
+<section id="view-world4" class="view hidden">
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <button onclick="go('dashboard')" class="btn-ghost mb-4"><i class="fa-solid fa-arrow-left mr-2"></i>Kembali ke Dashboard</button>
+    <div class="glass p-6 mb-6">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+          <div class="world-icon" style="--accent-color:var(--gold);margin:0;width:60px;height:60px;font-size:26px"><i class="fa-solid fa-gears" style="color:var(--gold)"></i></div>
+          <div>
+            <div class="text-xs uppercase tracking-widest font-bold" style="color:var(--gold)">World 4</div>
+            <h2 class="font-display text-3xl font-black">ALGORITMA</h2>
+          </div>
+        </div>
+        <div class="flex gap-2 flex-wrap" id="algMissions"></div>
+      </div>
+      <p style="color:var(--muted)" class="text-sm mt-3">Algoritma adalah langkah-langkah terurut dan sistematis. Susun kartu langkah secara berurutan dengan menyeret ke urutan yang benar!</p>
+    </div>
+    <div class="glass p-6 mb-4">
+      <div class="text-xs uppercase tracking-widest font-bold mb-2" style="color:var(--gold)">MISI SAAT INI</div>
+      <div class="font-display font-black text-xl" id="algTitle">Membuat Akun Email</div>
+    </div>
+    <div class="grid lg:grid-cols-2 gap-6">
+      <div class="glass p-6">
+        <h3 class="font-display font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-shuffle" style="color:var(--cyan)"></i> LANGKAH ACAK</h3>
+        <p class="text-xs mb-4" style="color:var(--muted)">Seret kartu ke kotak di sebelah kanan sesuai urutan yang benar!</p>
+        <div class="space-y-2" id="algShuffled"></div>
+      </div>
+      <div class="glass p-6">
+        <h3 class="font-display font-bold mb-4 flex items-center gap-2"><i class="fa-solid fa-list-ol" style="color:var(--lime)"></i> URUTAN YANG BENAR</h3>
+        <div class="space-y-2" id="algOrdered"></div>
+        <div class="mt-6 flex justify-end">
+          <button class="btn-neon" onclick="checkAlgorithm()"><i class="fa-solid fa-check mr-2"></i>PERIKSA URUTAN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: FINAL MISSION ===== -->
+<section id="view-world5" class="view hidden">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <button onclick="go('dashboard')" class="btn-ghost mb-4"><i class="fa-solid fa-arrow-left mr-2"></i>Kembali ke Dashboard</button>
+    <div class="glass p-8 mb-6 text-center" style="background:linear-gradient(135deg,rgba(177,77,255,0.15),rgba(255,215,0,0.1));border-color:var(--purple)">
+      <div class="text-6xl mb-3">🏆</div>
+      <h2 class="font-display text-3xl md:text-4xl font-black mb-2">MASTER PROBLEM SOLVER</h2>
+      <p style="color:var(--muted)">Sekolah akan mengadakan kegiatan class meeting. Selesaikan dengan empat tahap berpikir komputasional!</p>
+    </div>
+    <div class="glass p-6 mb-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center font-display font-black text-xl" style="background:linear-gradient(135deg,var(--cyan),var(--purple));color:white">01</div>
+        <div>
+          <div class="text-xs uppercase font-bold" style="color:var(--cyan)">🧩 DEKOMPOSISI</div>
+          <div class="font-display font-bold">Pecah masalah "Class Meeting" menjadi bagian kecil</div>
+        </div>
+      </div>
+      <textarea class="input-field" id="finalDec" placeholder="Tulis minimal 5 sub-masalah dari class meeting (pisahkan dengan baris baru)..." rows="5"></textarea>
+    </div>
+    <div class="glass p-6 mb-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center font-display font-black text-xl" style="background:linear-gradient(135deg,var(--pink),var(--purple));color:white">02</div>
+        <div>
+          <div class="text-xs uppercase font-bold" style="color:var(--pink)">🔍 PENGENALAN POLA</div>
+          <div class="font-display font-bold">Pola apa yang muncul dari class meeting sebelumnya?</div>
+        </div>
+      </div>
+      <textarea class="input-field" id="finalPat" placeholder="Contoh: setiap tahun selalu ada lomba olahraga, ada pembagian kelompok, ada penentuan juara..." rows="4"></textarea>
+    </div>
+    <div class="glass p-6 mb-4">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center font-display font-black text-xl" style="background:linear-gradient(135deg,var(--lime),var(--cyan));color:white">03</div>
+        <div>
+          <div class="text-xs uppercase font-bold" style="color:var(--lime)">🎯 ABSTRAKSI</div>
+          <div class="font-display font-bold">Informasi apa yang benar-benar penting?</div>
+        </div>
+      </div>
+      <textarea class="input-field" id="finalAbs" placeholder="Contoh: jumlah peserta, jenis lomba, jadwal, lokasi, hadiah..." rows="4"></textarea>
+    </div>
+    <div class="glass p-6 mb-6">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center font-display font-black text-xl" style="background:linear-gradient(135deg,var(--gold),var(--orange));color:white">04</div>
+        <div>
+          <div class="text-xs uppercase font-bold" style="color:var(--gold)">⚙️ ALGORITMA</div>
+          <div class="font-display font-bold">Susun langkah penyelesaiannya secara sistematis</div>
+        </div>
+      </div>
+      <textarea class="input-field" id="finalAlg" placeholder="Langkah 1: ...&#10;Langkah 2: ...&#10;Langkah 3: ...&#10;dst." rows="6"></textarea>
+    </div>
+    <div class="text-center">
+      <button class="btn-neon gold" onclick="submitFinal()"><i class="fa-solid fa-trophy mr-2"></i>SELESAIKAN MISI FINAL</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: MATERI ===== -->
+<section id="view-materi" class="view hidden">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="glass p-6 mb-6">
+      <h2 class="font-display text-3xl font-black mb-2">📚 MATERI PEMBELAJARAN</h2>
+      <p style="color:var(--muted)">Empat pilar Berpikir Komputasional yang akan kamu pelajari dan kuasai!</p>
+    </div>
+    <div class="flex gap-2 mb-6 flex-wrap">
+      <button class="tab-btn active" data-tab="dec" onclick="switchMateriTab('dec')"><i class="fa-solid fa-puzzle-piece mr-1.5"></i>Dekomposisi</button>
+      <button class="tab-btn" data-tab="pat" onclick="switchMateriTab('pat')"><i class="fa-solid fa-magnifying-glass mr-1.5"></i>Pola</button>
+      <button class="tab-btn" data-tab="abs" onclick="switchMateriTab('abs')"><i class="fa-solid fa-bullseye mr-1.5"></i>Abstraksi</button>
+      <button class="tab-btn" data-tab="alg" onclick="switchMateriTab('alg')"><i class="fa-solid fa-gears mr-1.5"></i>Algoritma</button>
+    </div>
+    <div class="glass p-8" id="materiContent"></div>
+  </div>
+</section>
+
+<!-- ===== VIEW: LKPD ===== -->
+<section id="view-lkpd" class="view hidden">
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <div class="glass p-6 mb-6 no-print">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 class="font-display text-3xl font-black mb-1">📋 LKPD</h2>
+          <p style="color:var(--muted)">Lembar Kerja Peserta Didik — Berpikir Komputasional</p>
+        </div>
+        <div class="flex gap-2">
+          <button class="btn-ghost" onclick="saveLKPD()"><i class="fa-solid fa-floppy-disk mr-2"></i>SIMPAN</button>
+          <button class="btn-neon" onclick="window.print()"><i class="fa-solid fa-print mr-2"></i>CETAK / PDF</button>
+        </div>
+      </div>
+    </div>
+    <div class="glass p-8" id="print-area">
+      <div class="text-center mb-6 pb-4 border-b-2" style="border-color:var(--border-strong)">
+        <div class="font-display font-black text-2xl">LEMBAR KERJA PESERTA DIDIK</div>
+        <div class="text-sm mt-1" style="color:var(--muted)">Berpikir Komputasional – Menyelesaikan Masalah Besar Menjadi Masalah Kecil</div>
+        <div class="text-xs mt-2" style="color:var(--muted)">Informatika SMP Kelas 7</div>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+        <div>Nama: <input type="text" class="input-field mt-1" id="lkpdName" placeholder="Nama lengkap" /></div>
+        <div>Kelas: <input type="text" class="input-field mt-1" id="lkpdClass" placeholder="Kelas" /></div>
+        <div>Kelompok: <input type="text" class="input-field mt-1" id="lkpdGroup" placeholder="Kelompok" /></div>
+        <div>Tanggal: <input type="date" class="input-field mt-1" id="lkpdDate" /></div>
+      </div>
+      <div class="mb-8">
+        <div class="font-display font-bold text-lg mb-2" style="color:var(--cyan)">AKTIVITAS 1 — DEKOMPOSISI</div>
+        <p class="text-sm mb-3">Masalah: <strong>"Bagaimana cara mempersiapkan kegiatan sekolah?"</strong></p>
+        <ol class="text-sm list-decimal pl-5 mb-3 space-y-1" style="color:var(--muted)">
+          <li>Apa masalah utama?</li>
+          <li>Pecahkan menjadi minimal 5 masalah kecil.</li>
+          <li>Siapa yang bertanggung jawab?</li>
+          <li>Bagaimana hubungan antarbagian?</li>
+        </ol>
+        <div class="overflow-x-auto">
+          <table class="data-table" style="background:var(--surface)">
+            <thead><tr><th>No</th><th>Masalah Kecil</th><th>Penanggung Jawab</th><th>Solusi</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><input type="text" class="input-field" id="lkpd_t1_1" /></td><td><input type="text" class="input-field" id="lkpd_t1_2" /></td><td><input type="text" class="input-field" id="lkpd_t1_3" /></td></tr>
+              <tr><td>2</td><td><input type="text" class="input-field" id="lkpd_t2_1" /></td><td><input type="text" class="input-field" id="lkpd_t2_2" /></td><td><input type="text" class="input-field" id="lkpd_t2_3" /></td></tr>
+              <tr><td>3</td><td><input type="text" class="input-field" id="lkpd_t3_1" /></td><td><input type="text" class="input-field" id="lkpd_t3_2" /></td><td><input type="text" class="input-field" id="lkpd_t3_3" /></td></tr>
+              <tr><td>4</td><td><input type="text" class="input-field" id="lkpd_t4_1" /></td><td><input type="text" class="input-field" id="lkpd_t4_2" /></td><td><input type="text" class="input-field" id="lkpd_t4_3" /></td></tr>
+              <tr><td>5</td><td><input type="text" class="input-field" id="lkpd_t5_1" /></td><td><input type="text" class="input-field" id="lkpd_t5_2" /></td><td><input type="text" class="input-field" id="lkpd_t5_3" /></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="mb-8">
+        <div class="font-display font-bold text-lg mb-2" style="color:var(--pink)">AKTIVITAS 2 — PENGENALAN POLA</div>
+        <p class="text-sm mb-3">Berikut beberapa pola yang ditemukan sehari-hari. Apa pola yang kamu temukan?</p>
+        <div class="space-y-3 text-sm">
+          <div>🔴 🔵 🔴 🔵 🔴 🔵 → <input type="text" class="input-field inline-block w-64 ml-2" id="lkpd_p1" placeholder="Pola yang kamu temukan" /></div>
+          <div>2, 4, 6, 8, 10, ... → <input type="text" class="input-field inline-block w-64 ml-2" id="lkpd_p2" placeholder="Pola yang kamu temukan" /></div>
+          <div>🔺🔻🔺🔻🔺 → <input type="text" class="input-field inline-block w-64 ml-2" id="lkpd_p3" placeholder="Pola yang kamu temukan" /></div>
+        </div>
+        <div class="mt-3">
+          <label class="text-xs font-bold uppercase" style="color:var(--muted)">Jelaskan pola yang kamu temukan dari masalah sehari-hari:</label>
+          <textarea class="input-field mt-1" id="lkpd_p4" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="mb-8">
+        <div class="font-display font-bold text-lg mb-2" style="color:var(--lime)">AKTIVITAS 3 — ABSTRAKSI</div>
+        <p class="text-sm mb-3">Skenario: <strong>"Kamu ingin membuat jadwal belajar."</strong> Pilih informasi yang penting dan abaikan yang tidak penting!</p>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <div class="font-bold mb-2" style="color:var(--lime)">INFORMASI PENTING:</div>
+            <textarea class="input-field" id="lkpd_a1" rows="4" placeholder="Tulis informasi penting..."></textarea>
+          </div>
+          <div>
+            <div class="font-bold mb-2" style="color:var(--pink)">INFORMASI TIDAK PENTING:</div>
+            <textarea class="input-field" id="lkpd_a2" rows="4" placeholder="Tulis informasi yang diabaikan..."></textarea>
+          </div>
+        </div>
+        <div class="mt-2 text-xs" style="color:var(--muted)">Daftar info: Mata pelajaran, Warna tas, Waktu belajar, Tempat belajar, Nama teman, Durasi belajar, Warna sepatu, Prioritas tugas</div>
+      </div>
+      <div class="mb-8">
+        <div class="font-display font-bold text-lg mb-2" style="color:var(--gold)">AKTIVITAS 4 — ALGORITMA</div>
+        <p class="text-sm mb-3">Tuliskan langkah-langkah menyelesaikan masalah: <strong>"Bagaimana cara mengumpulkan tugas melalui Google Classroom?"</strong></p>
+        <div class="space-y-2">
+          <div class="flex items-center gap-2"><span class="step-number">1</span><input type="text" class="input-field flex-1" id="lkpd_s1" /></div>
+          <div class="flex items-center gap-2"><span class="step-number">2</span><input type="text" class="input-field flex-1" id="lkpd_s2" /></div>
+          <div class="flex items-center gap-2"><span class="step-number">3</span><input type="text" class="input-field flex-1" id="lkpd_s3" /></div>
+          <div class="flex items-center gap-2"><span class="step-number">4</span><input type="text" class="input-field flex-1" id="lkpd_s4" /></div>
+          <div class="flex items-center gap-2"><span class="step-number">5</span><input type="text" class="input-field flex-1" id="lkpd_s5" /></div>
+          <div class="flex items-center gap-2"><span class="step-number">6</span><input type="text" class="input-field flex-1" id="lkpd_s6" /></div>
+          <div class="flex items-center gap-2"><span class="step-number">7</span><input type="text" class="input-field flex-1" id="lkpd_s7" /></div>
+        </div>
+      </div>
+      <div class="mb-4">
+        <div class="font-display font-bold text-lg mb-2" style="color:var(--purple)">AKTIVITAS 5 — TANTANGAN UTAMA</div>
+        <p class="text-sm mb-3">Masalah: <strong>"Sekolah ingin membuat sistem antrean kantin agar siswa tidak berdesakan."</strong> Selesaikan dengan empat tahap!</p>
+        <div class="space-y-3">
+          <div>
+            <div class="text-xs font-bold uppercase mb-1" style="color:var(--cyan)">Dekomposisi (masalah kecilnya apa saja?)</div>
+            <textarea class="input-field" id="lkpd_f1" rows="3"></textarea>
+          </div>
+          <div>
+            <div class="text-xs font-bold uppercase mb-1" style="color:var(--pink)">Pola (apakah ada pola masalah?)</div>
+            <textarea class="input-field" id="lkpd_f2" rows="3"></textarea>
+          </div>
+          <div>
+            <div class="text-xs font-bold uppercase mb-1" style="color:var(--lime)">Abstraksi (informasi penting apa?)</div>
+            <textarea class="input-field" id="lkpd_f3" rows="3"></textarea>
+          </div>
+          <div>
+            <div class="text-xs font-bold uppercase mb-1" style="color:var(--gold)">Algoritma (langkah penyelesaiannya?)</div>
+            <textarea class="input-field" id="lkpd_f4" rows="4"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: PENILAIAN ===== -->
+<section id="view-penilaian" class="view hidden">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="glass p-6 mb-6">
+      <h2 class="font-display text-3xl font-black mb-2">📊 PEDOMAN PENILAIAN</h2>
+      <p style="color:var(--muted)">Skor maksimal 100 poin dari 4 aspek berpikir komputasional</p>
+    </div>
+    <div class="grid md:grid-cols-4 gap-4 mb-6">
+      <div class="glass p-4 text-center"><div class="font-display text-3xl font-black" style="color:var(--cyan)">25</div><div class="text-xs" style="color:var(--muted)">Dekomposisi</div></div>
+      <div class="glass p-4 text-center"><div class="font-display text-3xl font-black" style="color:var(--pink)">25</div><div class="text-xs" style="color:var(--muted)">Pola</div></div>
+      <div class="glass p-4 text-center"><div class="font-display text-3xl font-black" style="color:var(--lime)">25</div><div class="text-xs" style="color:var(--muted)">Abstraksi</div></div>
+      <div class="glass p-4 text-center"><div class="font-display text-3xl font-black" style="color:var(--gold)">25</div><div class="text-xs" style="color:var(--muted)">Algoritma</div></div>
+    </div>
+    <div class="glass p-6 mb-6">
+      <h3 class="font-display font-bold text-xl mb-4">🏆 KATEGORI NILAI</h3>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div class="p-3 rounded-xl text-center" style="background:rgba(57,255,20,0.1);border:1px solid var(--lime)"><div class="font-display font-bold" style="color:var(--lime)">90-100</div><div class="text-sm">Sangat Baik</div></div>
+        <div class="p-3 rounded-xl text-center" style="background:rgba(0,229,255,0.1);border:1px solid var(--cyan)"><div class="font-display font-bold" style="color:var(--cyan)">80-89</div><div class="text-sm">Baik</div></div>
+        <div class="p-3 rounded-xl text-center" style="background:rgba(255,215,0,0.1);border:1px solid var(--gold)"><div class="font-display font-bold" style="color:var(--gold)">70-79</div><div class="text-sm">Cukup</div></div>
+        <div class="p-3 rounded-xl text-center" style="background:rgba(255,45,117,0.1);border:1px solid var(--pink)"><div class="font-display font-bold" style="color:var(--pink)">< 70</div><div class="text-sm">Perlu Bimbingan</div></div>
+      </div>
+    </div>
+    <div class="glass p-6 mb-6">
+      <h3 class="font-display font-bold text-xl mb-4">📋 RUBRIK PENILAIAN</h3>
+      <div class="overflow-x-auto">
+        <table class="data-table">
+          <thead>
+            <tr><th>Aspek</th><th>4 - Sangat Baik</th><th>3 - Baik</th><th>2 - Cukup</th><th>1 - Perlu Bimbingan</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Dekomposisi</strong></td><td>Memecah masalah secara lengkap, logis & sistematis</td><td>Memecah masalah dengan cukup tepat</td><td>Masih ada bagian penting yang terlewat</td><td>Belum mampu memecah masalah</td></tr>
+            <tr><td><strong>Pola</strong></td><td>Menemukan pola dengan tepat & menjelaskan alasannya</td><td>Menemukan sebagian besar pola</td><td>Menemukan pola tetapi belum konsisten</td><td>Belum mampu menemukan pola</td></tr>
+            <tr><td><strong>Abstraksi</strong></td><td>Mampu menentukan informasi penting dengan sangat tepat</td><td>Sebagian besar informasi tepat</td><td>Masih memilih informasi kurang relevan</td><td>Belum mampu membedakan informasi</td></tr>
+            <tr><td><strong>Algoritma</strong></td><td>Langkah sangat runtut, logis & mudah diterapkan</td><td>Langkah cukup runtut</td><td>Ada beberapa langkah yang kurang tepat</td><td>Langkah belum sistematis</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="mt-4 p-3 rounded-lg" style="background:var(--surface-2)">
+        <strong style="color:var(--cyan)">Rumus:</strong> <span class="text-sm">Skor Akhir = (Total Skor Diperoleh / Skor Maksimal) × 100</span>
+      </div>
+    </div>
+    <div class="glass p-6">
+      <h3 class="font-display font-bold text-xl mb-4">🧮 KALKULATOR NILAI OTOMATIS</h3>
+      <div class="grid md:grid-cols-4 gap-3 mb-4">
+        <div><label class="text-xs font-bold uppercase" style="color:var(--muted)">Dekomposisi (1-4)</label><input type="number" min="1" max="4" value="4" class="input-field mt-1" id="rDec" oninput="calcRubric()" /></div>
+        <div><label class="text-xs font-bold uppercase" style="color:var(--muted)">Pola (1-4)</label><input type="number" min="1" max="4" value="4" class="input-field mt-1" id="rPat" oninput="calcRubric()" /></div>
+        <div><label class="text-xs font-bold uppercase" style="color:var(--muted)">Abstraksi (1-4)</label><input type="number" min="1" max="4" value="4" class="input-field mt-1" id="rAbs" oninput="calcRubric()" /></div>
+        <div><label class="text-xs font-bold uppercase" style="color:var(--muted)">Algoritma (1-4)</label><input type="number" min="1" max="4" value="4" class="input-field mt-1" id="rAlg" oninput="calcRubric()" /></div>
+      </div>
+      <div class="grid md:grid-cols-3 gap-4 mt-4">
+        <div class="p-4 rounded-xl text-center" style="background:var(--surface-2)"><div class="text-xs uppercase" style="color:var(--muted)">Total Skor</div><div class="font-display text-3xl font-black" id="rTotal" style="color:var(--cyan)">16</div><div class="text-xs">/ 16</div></div>
+        <div class="p-4 rounded-xl text-center" style="background:var(--surface-2)"><div class="text-xs uppercase" style="color:var(--muted)">Nilai Akhir</div><div class="font-display text-3xl font-black" id="rFinal" style="color:var(--lime)">100</div></div>
+        <div class="p-4 rounded-xl text-center" style="background:var(--surface-2)"><div class="text-xs uppercase" style="color:var(--muted)">Predikat</div><div class="font-display text-xl font-black" id="rPred" style="color:var(--gold)">SANGAT BAIK</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: PRESTASI ===== -->
+<section id="view-prestasi" class="view hidden">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="glass p-6 mb-6">
+      <h2 class="font-display text-3xl font-black mb-2">🏆 HALL OF FAME</h2>
+      <p style="color:var(--muted)">Pencapaian dan badge yang telah kamu raih selama petualangan!</p>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6" id="badgeGrid"></div>
+    <div class="glass p-6">
+      <h3 class="font-display font-bold text-xl mb-4">📈 STATISTIK PEMAIN</h3>
+      <div class="grid md:grid-cols-3 gap-4">
+        <div class="p-4 rounded-xl text-center" style="background:var(--surface-2)"><div class="text-xs uppercase" style="color:var(--muted)">Total XP</div><div class="font-display text-3xl font-black" id="achXP" style="color:var(--cyan)">0</div></div>
+        <div class="p-4 rounded-xl text-center" style="background:var(--surface-2)"><div class="text-xs uppercase" style="color:var(--muted)">World Selesai</div><div class="font-display text-3xl font-black" id="achWorld" style="color:var(--lime)">0</div><div class="text-xs">/ 5</div></div>
+        <div class="p-4 rounded-xl text-center" style="background:var(--surface-2)"><div class="text-xs uppercase" style="color:var(--muted)">Badge Earned</div><div class="font-display text-3xl font-black" id="achBadge" style="color:var(--gold)">0</div><div class="text-xs">/ 5</div></div>
+      </div>
+    </div>
+    <div class="glass p-6 mt-6">
+      <h3 class="font-display font-bold text-xl mb-4">🎚️ LEVEL SISTEM</h3>
+      <div class="space-y-2" id="levelList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VIEW: GURU (ADMIN LOGIN & DASHBOARD) ===== -->
+<section id="view-guru" class="view hidden">
+  <!-- Login Page -->
+  <div id="adminLoginPage" class="admin-login-page">
+    <div class="grid-bg"></div>
+    <div class="admin-login-card">
+      <div class="admin-login-icon"><i class="fa-solid fa-user-shield"></i></div>
+      <h2 class="admin-login-title">LOGIN ADMIN</h2>
+      <p class="admin-login-sub">Masuk untuk memantau data siswa yang bermain game</p>
+      <div class="admin-input-group">
+        <label class="admin-input-label">Username</label>
+        <div class="admin-input-wrap">
+          <i class="fa-solid fa-user"></i>
+          <input type="text" class="input-field" id="adminUser" placeholder="Masukkan username" value="admin" />
+        </div>
+      </div>
+      <div class="admin-input-group">
+        <label class="admin-input-label">Password</label>
+        <div class="admin-input-wrap">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" class="input-field" id="adminPass" placeholder="Masukkan password" onkeydown="if(event.key==='Enter') adminLogin()" />
+        </div>
+      </div>
+      <button class="btn-neon w-full" onclick="adminLogin()" style="width:100%;margin-top:8px"><i class="fa-solid fa-right-to-bracket mr-2"></i>MASUK</button>
+      <div class="admin-demo-box">
+        <i class="fa-solid fa-info-circle mr-1"></i> Demo Login → Username: <strong>admin</strong> | Password: <strong>admin123</strong>
+      </div>
+      <div class="admin-back-link" onclick="go('landing')"><i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda</div>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="adminDashboard" class="hidden max-w-7xl mx-auto px-4 py-8">
+    <div class="glass p-6 mb-6">
+      <div class="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 class="font-display text-2xl font-black mb-1">👨‍🏫 DASHBOARD GURU</h2>
+          <p style="color:var(--muted)" class="text-sm">Pantau data siswa yang bermain game</p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button class="btn-ghost" onclick="exportCSV()"><i class="fa-solid fa-file-csv mr-2"></i>Export CSV</button>
+          <button class="btn-ghost" onclick="printTeacher()"><i class="fa-solid fa-print mr-2"></i>Cetak</button>
+          <button class="btn-ghost" onclick="adminLogout()"><i class="fa-solid fa-right-from-bracket mr-2"></i>Logout</button>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+      <div class="glass p-4 text-center"><div class="text-xs uppercase" style="color:var(--muted)">Total Siswa</div><div class="font-display text-2xl font-black" id="tTotal" style="color:var(--cyan)">0</div></div>
+      <div class="glass p-4 text-center"><div class="text-xs uppercase" style="color:var(--muted)">Rata-rata XP</div><div class="font-display text-2xl font-black" id="tAvgXP" style="color:var(--lime)">0</div></div>
+      <div class="glass p-4 text-center"><div class="text-xs uppercase" style="color:var(--muted)">Rata-rata Nilai</div><div class="font-display text-2xl font-black" id="tAvgNilai" style="color:var(--gold)">0</div></div>
+      <div class="glass p-4 text-center"><div class="text-xs uppercase" style="color:var(--muted)">Master Solver</div><div class="font-display text-2xl font-black" id="tMaster" style="color:var(--purple)">0</div></div>
+    </div>
+    <div class="glass p-6">
+      <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <h3 class="font-display font-bold text-lg">📋 DATA HASIL SISWA</h3>
+        <div class="flex gap-2 flex-wrap">
+          <input type="text" class="input-field" id="searchStudent" placeholder="Cari nama siswa..." oninput="renderStudents()" style="width:200px" />
+          <select class="input-field" id="filterClass" onchange="renderStudents()" style="width:140px">
+            <option value="">Semua Kelas</option>
+            <option>VII A</option><option>VII B</option><option>VII C</option><option>VII D</option><option>VII E</option><option>VII F</option>
+          </select>
+          <button class="btn-neon" onclick="addStudentModal()"><i class="fa-solid fa-plus mr-2"></i>Tambah</button>
+          <button class="btn-ghost" onclick="resetData()"><i class="fa-solid fa-rotate-left mr-2"></i>Reset</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto" id="print-area-teacher">
+        <table class="data-table">
+          <thead>
+            <tr><th>No</th><th>Nama</th><th>Kelas</th><th>Kelompok</th><th>XP</th><th>Nilai LKPD</th><th>Nilai Akhir</th><th>Predikat</th><th>Badge</th><th>Aksi</th></tr>
+          </thead>
+          <tbody id="studentTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div id="toast-container"></div>
+<div id="modal-root"></div>
+<canvas id="confetti"></canvas>
+
+<script type="module">
+import * as THREE from 'three';
+
+const STATE = {
+  view: 'landing',
+  player: { name: '', class: '', group: '', xp: 0, score: 0, stars: 0, energy: 100, level: 1, streak: 0, completedWorlds: [], worldStars: {1:0,2:0,3:0,4:0,5:0}, badges: [] },
+  settings: { sound: true, dark: true },
+  admin: { loggedIn: false, user: 'admin', pass: 'admin123' },
+  students: [],
+  currentWorld: 0,
+  dec: { placed: [], correct: [] },
+  pat: { level: 0, answered: false, timer: null, timeLeft: 30, correctCount: 0 },
+  abs: { placed: { important: [], notImportant: [] } },
+  alg: { mission: 0, ordered: [] }
+};
+
+const BADGES = [
+  { id: 'b1', name: 'Problem Solver Pemula', icon: '🏅', desc: 'Selesaikan World 1' },
+  { id: 'b2', name: 'Pattern Hunter', icon: '🥈', desc: 'Selesaikan World 2' },
+  { id: 'b3', name: 'Abstract Master', icon: '🥇', desc: 'Selesaikan World 3' },
+  { id: 'b4', name: 'Algorithm Architect', icon: '🏆', desc: 'Selesaikan World 4' },
+  { id: 'b5', name: 'Computational Thinking Master', icon: '👑', desc: 'Selesaikan Final Mission' }
+];
+
+const LEVELS = [
+  { level: 1, name: 'Problem Explorer', minXP: 0 },
+  { level: 2, name: 'Decomposition Hero', minXP: 150 },
+  { level: 3, name: 'Pattern Hunter', minXP: 350 },
+  { level: 4, name: 'Abstraction Expert', minXP: 550 },
+  { level: 5, name: 'Algorithm Designer', minXP: 750 },
+  { level: 6, name: 'Problem Solver', minXP: 900 },
+  { level: 7, name: 'Computational Thinking Master', minXP: 1000 }
+];
+
+const PATTERNS = [
+  { title: 'POLA WARNA', seq: ['🔵','🔴','🔵','🔴','🔵'], answer: '🔴', options: ['🔵','🔴','🟢','🟡'], explain: 'Pola yang muncul adalah biru-merah-biru-merah. Jadi objek berikutnya adalah merah.' },
+  { title: 'POLA BENTUK', seq: ['🔺','🔻','🔺','🔻','🔺'], answer: '🔻', options: ['🔺','🔻','🔶','🔷'], explain: 'Pola segitiga naik-turang secara bergantian. Berikutnya adalah segitiga turun.' },
+  { title: 'POLA ANGKA', seq: ['2','4','6','8','10'], answer: '12', options: ['11','12','13','14'], explain: 'Pola bertambah 2 setiap langkah. 10 + 2 = 12.' },
+  { title: 'POLA GANDA', seq: ['1','2','4','8','16'], answer: '32', options: ['24','28','32','36'], explain: 'Pola dikalikan 2 setiap langkah. 16 × 2 = 32.' },
+  { title: 'POLA FIBONACCI', seq: ['1','1','2','3','5'], answer: '8', options: ['6','7','8','9'], explain: 'Pola Fibonacci: jumlah dua angka sebelumnya. 3 + 5 = 8.' },
+  { title: 'POLA URUTAN', seq: ['🌙','☀️','🌙','☀️','🌙'], answer: '☀️', options: ['🌙','☀️','⭐','🌧️'], explain: 'Pola malam-siang secara bergantian. Berikutnya adalah siang.' }
+];
+
+const ALG_MISSIONS = [
+  { title: 'Membuat Akun Email', steps: ['Buka website email','Klik daftar','Isi nama','Buat alamat email','Buat password','Verifikasi','Akun selesai'] },
+  { title: 'Mengirim Email', steps: ['Buka aplikasi email','Klik tombol Compose','Isi alamat penerima','Tulis subjek','Tulis isi email','Klik Kirim','Email terkirim'] },
+  { title: 'Membuat Teh', steps: ['Siapkan gelas dan teh','Didihkan air','Tuang air ke gelas','Masukkan kantong teh','Tambahkan gula','Aduk hingga rata','Teh siap diminum'] },
+  { title: 'Menyalakan Komputer', steps: ['Pastikan kabel terhubung','Tekan tombol power','Tunggu loading muncul','Masukkan password','Tekan Enter','Tunggu desktop tampil','Komputer siap digunakan'] },
+  { title: 'Mengirim Tugas via Google Classroom', steps: ['Buka Google Classroom','Pilih kelas','Klik tab tugas','Pilih tugas yang akan dikumpulkan','Klik Add/Create','Unggah file tugas','Klik Submit'] },
+  { title: 'Menyelesaikan Komputer Macet', steps: ['Identifikasi masalah','Cek kabel listrik','Cek koneksi internet','Restart komputer','Jalankan antivirus','Update sistem','Komputer kembali normal'] }
+];
+
+const ABS_ITEMS = [
+  { id: 'a1', text: 'Jalan menuju perpustakaan', important: true },
+  { id: 'a2', text: 'Warna tas siswa', important: false },
+  { id: 'a3', text: 'Jarak sekolah ke perpustakaan', important: true },
+  { id: 'a4', text: 'Nama penjaga sekolah', important: false },
+  { id: 'a5', text: 'Jumlah pohon di jalan', important: false },
+  { id: 'a6', text: 'Nama gedung perpustakaan', important: true },
+  { id: 'a7', text: 'Warna sepatu siswa', important: false },
+  { id: 'a8', text: 'Kondisi jalan', important: true }
+];
+
+const DEC_ITEMS = [
+  { id: 'd1', text: 'Menentukan tempat', correct: true },
+  { id: 'd2', text: 'Menentukan waktu', correct: true },
+  { id: 'd3', text: 'Menentukan peserta', correct: true },
+  { id: 'd4', text: 'Membuat susunan acara', correct: true },
+  { id: 'd5', text: 'Menyiapkan perlengkapan', correct: true },
+  { id: 'd6', text: 'Membagi tugas', correct: true },
+  { id: 'd7', text: 'Menyiapkan konsumsi', correct: true },
+  { id: 'd8', text: 'Melakukan evaluasi', correct: true },
+  { id: 'd9', text: 'Memilih warna baju panitia', correct: false },
+  { id: 'd10', text: 'Menentukan merek sepatu MC', correct: false },
+  { id: 'd11', text: 'Memilih nama maskot pribadi', correct: false }
+];
+
+const STORAGE_KEY = 'mission_breakdown_v2';
+function saveState() {
+  try {
+    const data = { player: STATE.player, settings: STATE.settings, students: STATE.students, lkpd: getLKPDData(), admin: STATE.admin };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      Object.assign(STATE.player, data.player || {});
+      Object.assign(STATE.settings, data.settings || {});
+      STATE.students = data.students || [];
+      if (data.admin) Object.assign(STATE.admin, data.admin);
+      if (data.lkpd) setTimeout(() => setLKPDData(data.lkpd), 100);
+    }
+  } catch(e) {}
+}
+function getLKPDData() {
+  const ids = ['lkpdName','lkpdClass','lkpdGroup','lkpdDate','lkpd_p1','lkpd_p2','lkpd_p3','lkpd_p4','lkpd_a1','lkpd_a2','lkpd_f1','lkpd_f2','lkpd_f3','lkpd_f4','lkpd_s1','lkpd_s2','lkpd_s3','lkpd_s4','lkpd_s5','lkpd_s6','lkpd_s7'];
+  for (let i=1;i<=5;i++) for (let j=1;j<=3;j++) ids.push(`lkpd_t${i}_${j}`);
+  const out = {};
+  ids.forEach(id => { const el = document.getElementById(id); if (el) out[id] = el.value; });
+  return out;
+}
+function setLKPDData(data) {
+  Object.keys(data).forEach(id => { const el = document.getElementById(id); if (el) el.value = data[id]; });
+}
+
+window.go = function(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
+  const el = document.getElementById('view-' + view);
+  if (el) el.classList.remove('hidden');
+  document.querySelectorAll('[data-nav]').forEach(n => n.classList.toggle('active', n.dataset.nav === view));
+  STATE.view = view;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (view === 'dashboard') updateDashboard();
+  if (view === 'prestasi') updatePrestasi();
+  if (view === 'guru') {
+    if (STATE.admin.loggedIn) {
+      document.getElementById('adminLoginPage').classList.add('hidden');
+      document.getElementById('adminDashboard').classList.remove('hidden');
+      renderStudents();
+    } else {
+      document.getElementById('adminLoginPage').classList.remove('hidden');
+      document.getElementById('adminDashboard').classList.add('hidden');
+    }
+  }
+  if (view === 'penilaian') calcRubric();
+};
+
+let audioCtx = null;
+function playSound(type) {
+  if (!STATE.settings.sound) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    const freqs = { success: [523, 659, 784], error: [311, 233], click: [440], level: [523, 659, 784, 1046] };
+    const f = freqs[type] || freqs.click;
+    osc.frequency.setValueAtTime(f[0], audioCtx.currentTime);
+    if (f.length > 1) for (let i = 1; i < f.length; i++) osc.frequency.setValueAtTime(f[i], audioCtx.currentTime + i * 0.1);
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.4);
+  } catch(e) {}
+}
+window.toggleSound = function() {
+  STATE.settings.sound = !STATE.settings.sound;
+  document.getElementById('soundIcon').className = STATE.settings.sound ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+  saveState();
+};
+window.toggleDark = function() {
+  STATE.settings.dark = !STATE.settings.dark;
+  document.documentElement.classList.toggle('light', !STATE.settings.dark);
+  document.documentElement.classList.toggle('dark', STATE.settings.dark);
+  document.getElementById('darkIcon').className = STATE.settings.dark ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+  saveState();
+};
+
+function toast(msg, type = 'info', duration = 3000) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icons = { success: 'circle-check', error: 'circle-xmark', info: 'circle-info', warning: 'triangle-exclamation' };
+  t.innerHTML = `<i class="fa-solid fa-${icons[type] || 'circle-info'}"></i><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => t.remove(), duration + 400);
+}
+
+function addXP(amount, sourceEl) {
+  STATE.player.xp = Math.max(0, Math.min(1000, STATE.player.xp + amount));
+  STATE.player.score = Math.max(0, STATE.player.score + amount);
+  if (sourceEl) {
+    const rect = sourceEl.getBoundingClientRect();
+    const pop = document.createElement('div');
+    pop.className = 'xp-pop';
+    pop.textContent = (amount > 0 ? '+' : '') + amount + ' XP';
+    pop.style.left = (rect.left + rect.width/2) + 'px';
+    pop.style.top = rect.top + 'px';
+    document.body.appendChild(pop);
+    setTimeout(() => pop.remove(), 1500);
+  }
+  for (let i = LEVELS.length - 1; i >= 0; i--) {
+    if (STATE.player.xp >= LEVELS[i].minXP) {
+      if (STATE.player.level < LEVELS[i].level) {
+        STATE.player.level = LEVELS[i].level;
+        toast(`🎉 Level Up! Kamu sekarang Level ${LEVELS[i].level}: ${LEVELS[i].name}`, 'success', 4000);
+        playSound('level');
+      } else STATE.player.level = LEVELS[i].level;
+      break;
+    }
+  }
+  updatePlayerUI();
+  saveState();
+}
+
+function updatePlayerUI() {
+  document.getElementById('navPlayerName').textContent = STATE.player.name || 'Tamu';
+  document.getElementById('navXP').textContent = STATE.player.xp + ' XP';
+}
+
+function updateDashboard() {
+  const inpName = document.getElementById('inpName');
+  const inpClass = document.getElementById('inpClass');
+  const inpGroup = document.getElementById('inpGroup');
+  if (inpName) {
+    inpName.value = STATE.player.name;
+    inpName.oninput = e => { STATE.player.name = e.target.value; updatePlayerUI(); saveState(); };
+    inpClass.value = STATE.player.class;
+    inpClass.onchange = e => { STATE.player.class = e.target.value; saveState(); };
+    inpGroup.value = STATE.player.group;
+    inpGroup.oninput = e => { STATE.player.group = e.target.value; saveState(); };
+  }
+  document.getElementById('statXP').textContent = STATE.player.xp;
+  document.getElementById('statScore').textContent = STATE.player.score;
+  document.getElementById('xpBar').style.width = (STATE.player.xp / 1000 * 100) + '%';
+  document.getElementById('badgeLevel').innerHTML = `<i class="fa-solid fa-shield"></i> Level ${STATE.player.level}`;
+  document.getElementById('streakText').textContent = STATE.player.streak;
+  const totalStars = Object.values(STATE.player.worldStars).reduce((a,b) => a+b, 0);
+  document.getElementById('starCount').textContent = totalStars;
+  document.getElementById('star1').classList.toggle('filled', totalStars >= 1);
+  document.getElementById('star2').classList.toggle('filled', totalStars >= 2);
+  document.getElementById('star3').classList.toggle('filled', totalStars >= 3);
+  const eBar = document.getElementById('energyBar');
+  eBar.innerHTML = '';
+  const filled = Math.round(STATE.player.energy / 10);
+  for (let i = 0; i < 10; i++) {
+    const c = document.createElement('div');
+    c.className = 'energy-cell' + (i < filled ? ' full' : '');
+    eBar.appendChild(c);
+  }
+  document.getElementById('energyVal').textContent = STATE.player.energy;
+  for (let i = 1; i <= 5; i++) {
+    const card = document.getElementById('wc' + i);
+    if (!card) continue;
+    const unlocked = i === 1 || STATE.player.completedWorlds.includes(i - 1);
+    card.classList.toggle('locked', !unlocked);
+    const stars = STATE.player.worldStars[i] || 0;
+    const starEl = document.getElementById(`w${i}stars`);
+    if (starEl) starEl.textContent = stars;
+    const statusEl = document.getElementById(`w${i}status`);
+    if (statusEl) statusEl.innerHTML = unlocked ? (STATE.player.completedWorlds.includes(i) ? '<span style="color:var(--lime)">SELESAI ✓</span>' : 'TERBUKA') : '<i class="fa-solid fa-lock"></i> TERKUNCI';
+  }
+  document.getElementById('badgeCount').textContent = STATE.player.badges.length;
+}
+
+window.openWorld = function(num) {
+  const unlocked = num === 1 || STATE.player.completedWorlds.includes(num - 1);
+  if (!unlocked) { toast('World ini terkunci! Selesaikan world sebelumnya dulu.', 'warning'); return; }
+  if (!STATE.player.name) { toast('Isi nama dulu di dashboard sebelum mulai bermain!', 'warning'); return; }
+  STATE.currentWorld = num;
+  if (num === 1) { initDecomposition(); go('world1'); }
+  else if (num === 2) { initPattern(); go('world2'); }
+  else if (num === 3) { initAbstraction(); go('world3'); }
+  else if (num === 4) { initAlgorithm(); go('world4'); }
+  else if (num === 5) { go('world5'); }
+};
+
+function initDecomposition() {
+  STATE.dec = { placed: [], correct: [] };
+  const container = document.getElementById('decItems');
+  const shuffled = [...DEC_ITEMS].sort(() => Math.random() - 0.5);
+  container.innerHTML = shuffled.map(item => `<div class="drag-item" data-id="${item.id}" data-correct="${item.correct}"><i class="fa-solid fa-grip-vertical" style="color:var(--muted)"></i> ${item.text}</div>`).join('');
+  const drop = document.getElementById('decDrop');
+  drop.innerHTML = '<div class="text-center text-sm py-4" style="color:var(--muted)">Drop kartu di sini untuk memecah masalah...</div>';
+  container.querySelectorAll('.drag-item').forEach(setupDragItem);
+  setupDropZone(drop, (item) => {
+    drop.querySelectorAll('.text-center').forEach(el => el.remove());
+    const placed = document.createElement('div');
+    placed.className = 'drag-item placed mb-2';
+    placed.dataset.id = item.dataset.id;
+    placed.dataset.correct = item.dataset.correct;
+    placed.innerHTML = `<i class="fa-solid fa-check" style="color:var(--lime)"></i> ${item.textContent.trim()} <button onclick="removeDecItem('${item.dataset.id}')" class="ml-auto text-xs" style="color:var(--pink)"><i class="fa-solid fa-xmark"></i></button>`;
+    drop.appendChild(placed);
+    item.style.display = 'none';
+    STATE.dec.placed.push({ id: item.dataset.id, correct: item.dataset.correct === 'true', text: item.textContent.trim() });
+  });
+}
+
+function setupDragItem(item) {
+  item.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    item.classList.add('dragging');
+    const rect = item.getBoundingClientRect();
+    const ghost = item.cloneNode(true);
+    ghost.style.position = 'fixed';
+    ghost.style.left = rect.left + 'px';
+    ghost.style.top = rect.top + 'px';
+    ghost.style.width = rect.width + 'px';
+    ghost.style.zIndex = '10000';
+    ghost.style.pointerEvents = 'none';
+    ghost.style.opacity = '0.9';
+    ghost.style.transform = 'rotate(3deg) scale(1.05)';
+    document.body.appendChild(ghost);
+    const dragging = { ghost, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top, source: item };
+    function move(ev) {
+      if (!dragging) return;
+      dragging.ghost.style.left = (ev.clientX - dragging.offsetX) + 'px';
+      dragging.ghost.style.top = (ev.clientY - dragging.offsetY) + 'px';
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('over'));
+      const els = document.elementsFromPoint(ev.clientX, ev.clientY);
+      const zone = els.find(el => el.classList && el.classList.contains('drop-zone'));
+      if (zone) zone.classList.add('over');
+    }
+    function up(ev) {
+      if (!dragging) return;
+      const els = document.elementsFromPoint(ev.clientX, ev.clientY);
+      const zone = els.find(el => el.classList && el.classList.contains('drop-zone'));
+      if (zone && zone !== dragging.source.parentElement) {
+        const cb = zone._dropCallback;
+        if (cb) cb(dragging.source);
+      }
+      dragging.ghost.remove();
+      dragging.source.classList.remove('dragging');
+      document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('over'));
+      dragging = null;
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
+    }
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+  });
+}
+function setupDropZone(zone, callback) { zone._dropCallback = callback; }
+
+window.removeDecItem = function(id) {
+  STATE.dec.placed = STATE.dec.placed.filter(p => p.id !== id);
+  const item = document.querySelector(`#decItems [data-id="${id}"]`);
+  if (item) item.style.display = '';
+  const placed = document.querySelector(`#decDrop [data-id="${id}"]`);
+  if (placed) placed.remove();
+  if (STATE.dec.placed.length === 0) document.getElementById('decDrop').innerHTML = '<div class="text-center text-sm py-4" style="color:var(--muted)">Drop kartu di sini untuk memecah masalah...</div>';
+};
+
+window.checkDecomposition = function() {
+  const correct = STATE.dec.placed.filter(p => p.correct).length;
+  const wrong = STATE.dec.placed.filter(p => !p.correct).length;
+  const total = DEC_ITEMS.filter(i => i.correct).length;
+  document.getElementById('decCorrect').textContent = correct;
+  if (correct === total && wrong === 0) {
+    const bonus = STATE.player.energy === 100 ? 100 : 0;
+    addXP(100 + bonus);
+    STATE.player.streak++;
+    completeWorld(1, 3);
+    toast(`Excellent! Kamu berhasil memecah masalah besar menjadi bagian yang lebih kecil. +${100+bonus} XP`, 'success', 5000);
+  } else if (correct >= 5) {
+    addXP(50);
+    completeWorld(1, 2);
+    toast(`Cukup baik! +50 XP. Tapi ada ${wrong} kartu yang salah dan ${total-correct} yang terlewat.`, 'warning', 5000);
+  } else {
+    addXP(-20);
+    STATE.player.energy = Math.max(0, STATE.player.energy - 10);
+    toast('Coba pikirkan: apakah bagian ini benar-benar merupakan bagian dari masalah utama? -20 XP', 'error', 5000);
+  }
+  updatePlayerUI();
+  saveState();
+};
+
+function initPattern() {
+  STATE.pat = { level: 0, answered: false, timer: null, timeLeft: 30, correctCount: 0 };
+  loadPatternLevel();
+}
+function loadPatternLevel() {
+  if (STATE.pat.level >= PATTERNS.length) {
+    const stars = STATE.pat.correctCount >= 5 ? 3 : STATE.pat.correctCount >= 3 ? 2 : 1;
+    addXP(100 + (STATE.pat.correctCount >= 5 ? 100 : 0));
+    completeWorld(2, stars);
+    toast(`Pattern selesai! ${STATE.pat.correctCount}/${PATTERNS.length} benar. +${100 + (STATE.pat.correctCount >= 5 ? 100 : 0)} XP`, 'success', 5000);
+    return;
+  }
+  const p = PATTERNS[STATE.pat.level];
+  document.getElementById('patLevel').textContent = STATE.pat.level + 1;
+  document.getElementById('patTitle').textContent = p.title;
+  document.getElementById('patSequence').innerHTML = p.seq.map(s => `<div class="pattern-item">${s}</div>`).join('') + '<div class="pattern-item question">?</div>';
+  document.getElementById('patOptions').innerHTML = p.options.map(o => `<div class="pattern-option" onclick="answerPattern('${o}')" data-val="${o}">${o}</div>`).join('');
+  document.getElementById('patExplain').style.display = 'none';
+  STATE.pat.answered = false;
+  if (STATE.pat.timer) clearInterval(STATE.pat.timer);
+  STATE.pat.timeLeft = 30;
+  updatePatTimer();
+  STATE.pat.timer = setInterval(() => {
+    STATE.pat.timeLeft--;
+    updatePatTimer();
+    if (STATE.pat.timeLeft <= 0) { clearInterval(STATE.pat.timer); answerPattern(null); }
+  }, 1000);
+}
+function updatePatTimer() {
+  const el = document.getElementById('patTimer');
+  if (!el) return;
+  const m = String(Math.floor(STATE.pat.timeLeft / 60)).padStart(2,'0');
+  const s = String(STATE.pat.timeLeft % 60).padStart(2,'0');
+  el.textContent = `${m}:${s}`;
+  el.className = 'timer-display' + (STATE.pat.timeLeft <= 5 ? ' danger' : STATE.pat.timeLeft <= 15 ? ' warning' : '');
+}
+window.answerPattern = function(val) {
+  if (STATE.pat.answered) return;
+  STATE.pat.answered = true;
+  if (STATE.pat.timer) clearInterval(STATE.pat.timer);
+  const p = PATTERNS[STATE.pat.level];
+  document.querySelectorAll('#patOptions .pattern-option').forEach(o => {
+    if (o.dataset.val === p.answer) o.classList.add('correct');
+    else if (o.dataset.val === val) o.classList.add('wrong');
+    o.style.pointerEvents = 'none';
+  });
+  const correct = val === p.answer;
+  if (correct) {
+    STATE.pat.correctCount++;
+    const bonus = STATE.pat.timeLeft >= 20 ? 50 : 0;
+    addXP(100 + bonus);
+    playSound('success');
+  } else {
+    addXP(-20);
+    STATE.player.energy = Math.max(0, STATE.player.energy - 10);
+    playSound('error');
+  }
+  document.getElementById('patExplain').style.display = 'block';
+  document.getElementById('patExplainText').textContent = p.explain + (correct ? '' : ` Jawaban benar: ${p.answer}`);
+  setTimeout(() => { STATE.pat.level++; loadPatternLevel(); }, 3500);
+};
+
+function initAbstraction() {
+  STATE.abs = { placed: { important: [], notImportant: [] } };
+  const container = document.getElementById('absItems');
+  const shuffled = [...ABS_ITEMS].sort(() => Math.random() - 0.5);
+  container.innerHTML = shuffled.map(item => `<div class="drag-item" data-id="${item.id}" data-important="${item.important}"><i class="fa-solid fa-grip-vertical" style="color:var(--muted)"></i> ${item.text}</div>`).join('');
+  document.getElementById('absDropImportant').innerHTML = '';
+  document.getElementById('absDropNotImportant').innerHTML = '';
+  container.querySelectorAll('.drag-item').forEach(setupDragItem);
+  setupDropZone(document.getElementById('absDropImportant'), (item) => {
+    if (document.querySelector(`#absDropImportant [data-id="${item.dataset.id}"]`)) return;
+    placeAbsItem(item, 'important');
+  });
+  setupDropZone(document.getElementById('absDropNotImportant'), (item) => {
+    if (document.querySelector(`#absDropNotImportant [data-id="${item.dataset.id}"]`)) return;
+    placeAbsItem(item, 'notImportant');
+  });
+}
+function placeAbsItem(item, zone) {
+  const target = document.getElementById(zone === 'important' ? 'absDropImportant' : 'absDropNotImportant');
+  const placed = document.createElement('div');
+  placed.className = 'drag-item placed mb-2';
+  placed.dataset.id = item.dataset.id;
+  placed.dataset.important = item.dataset.important;
+  placed.innerHTML = `<i class="fa-solid fa-${zone === 'important' ? 'check' : 'xmark'}" style="color:${zone === 'important' ? 'var(--lime)' : 'var(--pink)'}"></i> ${item.textContent.trim()} <button onclick="removeAbsItem('${item.dataset.id}')" class="ml-auto text-xs" style="color:var(--pink)"><i class="fa-solid fa-rotate-left"></i></button>`;
+  target.appendChild(placed);
+  item.style.display = 'none';
+  STATE.abs.placed[zone].push({ id: item.dataset.id, important: item.dataset.important === 'true', text: item.textContent.trim() });
+}
+window.removeAbsItem = function(id) {
+  ['important','notImportant'].forEach(z => {
+    STATE.abs.placed[z] = STATE.abs.placed[z].filter(p => p.id !== id);
+    const el = document.querySelector(`#${z === 'important' ? 'absDropImportant' : 'absDropNotImportant'} [data-id="${id}"]`);
+    if (el) el.remove();
+  });
+  const item = document.querySelector(`#absItems [data-id="${id}"]`);
+  if (item) item.style.display = '';
+};
+window.checkAbstraction = function() {
+  let correct = 0; const total = ABS_ITEMS.length;
+  STATE.abs.placed.important.forEach(p => { if (p.important) correct++; });
+  STATE.abs.placed.notImportant.forEach(p => { if (!p.important) correct++; });
+  if (correct === total) { addXP(200); completeWorld(3, 3); toast(`Sempurna! Semua informasi berhasil dikategorikan dengan benar. +200 XP`, 'success', 5000); }
+  else if (correct >= 6) { addXP(75); completeWorld(3, 2); toast(`Cukup baik! ${correct}/${total} benar. +75 XP`, 'warning', 5000); }
+  else { addXP(-20); STATE.player.energy = Math.max(0, STATE.player.energy - 10); toast(`Belum tepat. Ingat: fokus pada informasi yang relevan dengan tujuan! -20 XP`, 'error', 5000); }
+  saveState();
+};
+
+function initAlgorithm() {
+  STATE.alg = { mission: 0, ordered: [] };
+  renderAlgMissions();
+  loadAlgMission();
+}
+function renderAlgMissions() {
+  document.getElementById('algMissions').innerHTML = ALG_MISSIONS.map((m, i) => `<button class="tab-btn ${i === 0 ? 'active' : ''}" onclick="selectAlgMission(${i})">${i+1}. ${m.title}</button>`).join('');
+}
+window.selectAlgMission = function(i) {
+  STATE.alg.mission = i;
+  document.querySelectorAll('#algMissions .tab-btn').forEach((b, idx) => b.classList.toggle('active', idx === i));
+  loadAlgMission();
+};
+function loadAlgMission() {
+  const m = ALG_MISSIONS[STATE.alg.mission];
+  document.getElementById('algTitle').textContent = m.title;
+  STATE.alg.ordered = [];
+  const shuffled = m.steps.map((s, i) => ({ text: s, originalIdx: i })).sort(() => Math.random() - 0.5);
+  document.getElementById('algShuffled').innerHTML = shuffled.map(s => `<div class="step-card" data-orig="${s.originalIdx}" data-text="${s.text}"><i class="fa-solid fa-grip-vertical" style="color:var(--muted)"></i> ${s.text}</div>`).join('');
+  document.getElementById('algOrdered').innerHTML = Array(m.steps.length).fill(0).map((_, i) => `<div class="step-list-slot" data-pos="${i}"><span class="step-number">${i+1}</span><span class="text-sm" style="color:var(--muted)">Drop langkah di sini...</span></div>`).join('');
+  document.querySelectorAll('#algShuffled .step-card').forEach(setupDragItem);
+  document.querySelectorAll('#algOrdered .step-list-slot').forEach(slot => {
+    setupDropZone(slot, (item) => {
+      const existing = slot.querySelector('.step-card');
+      if (existing) { document.getElementById('algShuffled').appendChild(existing); existing.style.display = ''; }
+      slot.innerHTML = '';
+      slot.appendChild(item);
+      item.style.display = '';
+      item.classList.remove('placed');
+    });
+  });
+}
+window.checkAlgorithm = function() {
+  const m = ALG_MISSIONS[STATE.alg.mission];
+  const slots = document.querySelectorAll('#algOrdered .step-list-slot');
+  let correct = 0;
+  slots.forEach((slot, i) => {
+    const card = slot.querySelector('.step-card');
+    if (card && parseInt(card.dataset.orig) === i) { correct++; card.style.borderColor = 'var(--lime)'; }
+    else if (card) card.style.borderColor = 'var(--pink)';
+  });
+  if (correct === m.steps.length) {
+    addXP(100);
+    playSound('success');
+    if (STATE.alg.mission < ALG_MISSIONS.length - 1) {
+      toast(`Sempurna! Urutan benar. +100 XP`, 'success', 3000);
+      setTimeout(() => { STATE.alg.mission++; selectAlgMission(STATE.alg.mission); }, 1500);
+    } else {
+      addXP(100);
+      completeWorld(4, 3);
+      toast(`Algorithm Architect! Semua misi algoritma selesai! +200 XP`, 'success', 5000);
+    }
+  } else {
+    addXP(-20);
+    STATE.player.energy = Math.max(0, STATE.player.energy - 10);
+    toast(`${correct}/${m.steps.length} langkah benar. Coba periksa urutan yang salah! -20 XP`, 'error', 4000);
+    playSound('error');
+  }
+  saveState();
+};
+
+function completeWorld(num, stars) {
+  if (!STATE.player.completedWorlds.includes(num)) {
+    STATE.player.completedWorlds.push(num);
+    if (num <= 5) {
+      const badge = BADGES[num - 1];
+      if (badge && !STATE.player.badges.includes(badge.id)) STATE.player.badges.push(badge.id);
+    }
+    confetti();
+    showMissionComplete(num);
+  }
+  STATE.player.worldStars[num] = Math.max(STATE.player.worldStars[num] || 0, stars);
+  STATE.player.energy = Math.min(100, STATE.player.energy + 20);
+  saveState();
+}
+function showMissionComplete(num) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content text-center">
+      <div class="text-7xl mb-3">🎉</div>
+      <h2 class="font-display text-3xl font-black mb-2" style="color:var(--cyan)">MISSION COMPLETE!</h2>
+      <p style="color:var(--muted)" class="mb-4">Kamu telah menyelesaikan World ${num}!</p>
+      <div class="flex justify-center gap-2 mb-4">
+        ${[1,2,3].map(i => `<span class="star ${i <= (STATE.player.worldStars[num] || 0) ? 'filled' : ''}" style="font-size:48px">★</span>`).join('')}
+      </div>
+      <div class="glass p-3 mb-4">
+        <div class="text-xs" style="color:var(--muted)">Badge Earned</div>
+        <div class="font-display font-bold text-lg">${BADGES[num-1] ? BADGES[num-1].icon + ' ' + BADGES[num-1].name : '🏆'}</div>
+      </div>
+      <div class="flex gap-2 justify-center">
+        <button class="btn-ghost" onclick="this.closest('.modal-overlay').remove(); go('dashboard')">Dashboard</button>
+        <button class="btn-neon" onclick="this.closest('.modal-overlay').remove(); ${num < 5 ? `openWorld(${num+1})` : "go('dashboard')"}">Lanjut →</button>
+      </div>
+    </div>`;
+  document.getElementById('modal-root').appendChild(modal);
+}
+
+window.submitFinal = function() {
+  const dec = document.getElementById('finalDec').value.trim();
+  const pat = document.getElementById('finalPat').value.trim();
+  const abs = document.getElementById('finalAbs').value.trim();
+  const alg = document.getElementById('finalAlg').value.trim();
+  if (!dec || !pat || !abs || !alg) { toast('Lengkapi semua tahap penyelesaian terlebih dahulu!', 'warning'); return; }
+  addXP(500);
+  completeWorld(5, 3);
+  registerStudent();
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content text-center" style="max-width:600px">
+      <div class="text-7xl mb-3">🏆</div>
+      <h2 class="font-display text-4xl font-black mb-2" style="background:linear-gradient(135deg,var(--gold),var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent">CONGRATULATIONS!</h2>
+      <p class="font-display text-xl mb-4" style="color:var(--cyan)">Kamu telah menjadi MASTER PROBLEM SOLVER!</p>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div class="glass p-3"><div class="text-xs" style="color:var(--muted)">Total Skor</div><div class="font-display text-2xl font-black" style="color:var(--gold)">${STATE.player.score}</div></div>
+        <div class="glass p-3"><div class="text-xs" style="color:var(--muted)">Total XP</div><div class="font-display text-2xl font-black" style="color:var(--cyan)">${STATE.player.xp}</div></div>
+        <div class="glass p-3"><div class="text-xs" style="color:var(--muted)">World Selesai</div><div class="font-display text-2xl font-black" style="color:var(--lime)">${STATE.player.completedWorlds.length}/5</div></div>
+        <div class="glass p-3"><div class="text-xs" style="color:var(--muted)">Badge</div><div class="font-display text-2xl font-black" style="color:var(--purple)">${STATE.player.badges.length}/5</div></div>
+      </div>
+      <div class="glass p-4 mb-4" style="background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(177,77,255,0.1))">
+        <div class="text-xs" style="color:var(--muted)">BADGE TERTINGGI</div>
+        <div class="font-display font-black text-2xl" style="color:var(--gold)">👑 COMPUTATIONAL THINKING MASTER</div>
+      </div>
+      <div class="flex gap-2 justify-center">
+        <button class="btn-ghost" onclick="this.closest('.modal-overlay').remove(); go('prestasi')">Lihat Prestasi</button>
+        <button class="btn-neon gold" onclick="this.closest('.modal-overlay').remove(); go('dashboard')">Dashboard</button>
+      </div>
+    </div>`;
+  document.getElementById('modal-root').appendChild(modal);
+  confetti(200);
+};
+
+const MATERI = {
+  dec: { color: 'var(--cyan)', title: 'DEKOMPOSISI', icon: 'puzzle-piece', content: `
+    <p class="mb-4">Dekomposisi adalah proses memecah masalah besar menjadi beberapa masalah kecil agar lebih mudah diselesaikan.</p>
+    <div class="grid md:grid-cols-3 gap-4 mb-6">
+      <div class="glass p-4 text-center"><i class="fa-solid fa-bullseye text-3xl mb-2" style="color:var(--pink)"></i><div class="font-bold">Masalah Besar</div><div class="text-sm" style="color:var(--muted)">"Membersihkan kelas"</div></div>
+      <div class="flex items-center justify-center text-3xl" style="color:var(--cyan)"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="glass p-4 text-center"><i class="fa-solid fa-list-check text-3xl mb-2" style="color:var(--lime)"></i><div class="font-bold">Bagian Kecil</div><div class="text-sm" style="color:var(--muted)">6 sub-tugas</div></div>
+    </div>
+    <div class="font-bold mb-3">Contoh: "Membersihkan kelas" dipecah menjadi:</div>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
+      ${['Menyapu','Mengepel','Membersihkan meja','Membersihkan papan tulis','Mengatur kursi','Membuang sampah'].map(t => `<div class="p-3 rounded-lg" style="background:var(--surface-2);border:1px solid var(--border)"><i class="fa-solid fa-check mr-2" style="color:var(--lime)"></i>${t}</div>`).join('')}
+    </div>` },
+  pat: { color: 'var(--pink)', title: 'PENGENALAN POLA', icon: 'magnifying-glass', content: `
+    <p class="mb-4">Pengenalan pola adalah mencari kesamaan atau pola yang muncul pada beberapa masalah. Dengan menemukan pola, kita bisa memprediksi solusi!</p>
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div class="glass p-4"><div class="font-bold mb-2" style="color:var(--pink)">Pola Warna</div><div class="text-2xl mb-2">🔵🔴🔵🔴🔵🔴</div><div class="text-sm" style="color:var(--muted)">Biru-merah bergantian</div></div>
+      <div class="glass p-4"><div class="font-bold mb-2" style="color:var(--pink)">Pola Angka</div><div class="text-2xl mb-2">2, 4, 6, 8, 10</div><div class="text-sm" style="color:var(--muted)">Bertambah 2</div></div>
+      <div class="glass p-4"><div class="font-bold mb-2" style="color:var(--pink)">Pola Bentuk</div><div class="text-2xl mb-2">🔺🔻🔺🔻🔺</div><div class="text-sm" style="color:var(--muted)">Naik-turun bergantian</div></div>
+      <div class="glass p-4"><div class="font-bold mb-2" style="color:var(--pink)">Pola Kegiatan</div><div class="text-2xl mb-2">🌙☀️🌙☀️🌙</div><div class="text-sm" style="color:var(--muted)">Malam-siang bergantian</div></div>
+    </div>` },
+  abs: { color: 'var(--lime)', title: 'ABSTRAKSI', icon: 'bullseye', content: `
+    <p class="mb-4">Abstraksi adalah memusatkan perhatian pada informasi penting dan mengabaikan informasi yang tidak diperlukan.</p>
+    <div class="grid md:grid-cols-2 gap-4 mb-4">
+      <div class="glass p-4" style="border-color:var(--lime)">
+        <div class="font-bold mb-2" style="color:var(--lime)">✓ INFORMASI PENTING</div>
+        <ul class="text-sm space-y-1">
+          <li><i class="fa-solid fa-check mr-2" style="color:var(--lime)"></i>Tujuan perjalanan</li>
+          <li><i class="fa-solid fa-check mr-2" style="color:var(--lime)"></i>Jarak dan rute</li>
+          <li><i class="fa-solid fa-check mr-2" style="color:var(--lime)"></i>Waktu tempuh</li>
+          <li><i class="fa-solid fa-check mr-2" style="color:var(--lime)"></i>Moda transportasi</li>
+        </ul>
+      </div>
+      <div class="glass p-4" style="border-color:var(--pink)">
+        <div class="font-bold mb-2" style="color:var(--pink)">✗ TIDAK PENTING</div>
+        <ul class="text-sm space-y-1">
+          <li><i class="fa-solid fa-xmark mr-2" style="color:var(--pink)"></i>Warna tas teman</li>
+          <li><i class="fa-solid fa-xmark mr-2" style="color:var(--pink)"></i>Jumlah pohon di jalan</li>
+          <li><i class="fa-solid fa-xmark mr-2" style="color:var(--pink)"></i>Nama penjaga sekolah</li>
+          <li><i class="fa-solid fa-xmark mr-2" style="color:var(--pink)"></i>Warna sepatu siswa</li>
+        </ul>
+      </div>
+    </div>` },
+  alg: { color: 'var(--gold)', title: 'ALGORITMA', icon: 'gears', content: `
+    <p class="mb-4">Algoritma adalah langkah-langkah terurut dan sistematis untuk menyelesaikan masalah.</p>
+    <div class="font-bold mb-3">Contoh: Algoritma membuat teh</div>
+    <div class="space-y-1">
+      ${['Siapkan gelas dan teh','Didihkan air','Tuang air ke gelas','Masukkan kantong teh','Tambahkan gula','Aduk hingga rata','Teh siap diminum'].map((s,i) => `
+        <div class="flex items-center gap-3">
+          <div class="step-number">${i+1}</div>
+          <div class="flex-1 p-3 rounded-lg" style="background:var(--surface-2);border:1px solid var(--border)">${s}</div>
+          ${i < 6 ? '<div class="flow-arrow"><i class="fa-solid fa-arrow-down"></i></div>' : ''}
+        </div>`).join('')}
+    </div>` }
+};
+
+window.switchMateriTab = function(tab) {
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  const m = MATERI[tab];
+  document.getElementById('materiContent').innerHTML = `
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-14 h-14 rounded-xl flex items-center justify-center" style="background:var(--surface-2);border:1px solid ${m.color}">
+        <i class="fa-solid fa-${m.icon} text-2xl" style="color:${m.color}"></i>
+      </div>
+      <div>
+        <div class="text-xs uppercase font-bold" style="color:${m.color}">Pilar Berpikir Komputasional</div>
+        <h3 class="font-display text-2xl font-black">${m.title}</h3>
+      </div>
+    </div>
+    ${m.content}`;
+};
+
+function updatePrestasi() {
+  document.getElementById('badgeGrid').innerHTML = BADGES.map(b => {
+    const earned = STATE.player.badges.includes(b.id);
+    return `<div class="achievement ${earned ? 'earned' : 'locked'}">
+      <div class="achievement-icon">${b.icon}</div>
+      <div class="font-bold text-sm">${b.name}</div>
+      <div class="text-xs" style="color:var(--muted)">${b.desc}</div>
+      ${earned ? '<div class="text-xs mt-1" style="color:var(--gold)"><i class="fa-solid fa-check-circle"></i> Earned</div>' : '<div class="text-xs mt-1" style="color:var(--muted)"><i class="fa-solid fa-lock"></i> Locked</div>'}
+    </div>`;
+  }).join('');
+  document.getElementById('achXP').textContent = STATE.player.xp;
+  document.getElementById('achWorld').textContent = STATE.player.completedWorlds.length;
+  document.getElementById('achBadge').textContent = STATE.player.badges.length;
+  document.getElementById('levelList').innerHTML = LEVELS.map(l => {
+    const unlocked = STATE.player.xp >= l.minXP;
+    const current = STATE.player.level === l.level;
+    return `<div class="flex items-center gap-3 p-3 rounded-lg" style="background:${current ? 'rgba(0,229,255,0.1)' : 'var(--surface-2)'};border:1px solid ${current ? 'var(--cyan)' : 'var(--border)'}">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center font-display font-black" style="background:${unlocked ? 'linear-gradient(135deg,var(--cyan),var(--purple))' : 'var(--surface)'};color:${unlocked ? 'white' : 'var(--muted)'}">${l.level}</div>
+      <div class="flex-1">
+        <div class="font-bold ${current ? 'glow-cyan' : ''}" style="color:${unlocked ? 'var(--text)' : 'var(--muted)'}">${l.name}</div>
+        <div class="text-xs" style="color:var(--muted)">${l.minXP} XP${current ? ' (CURRENT)' : ''}</div>
+      </div>
+      ${unlocked ? '<i class="fa-solid fa-check" style="color:var(--lime)"></i>' : '<i class="fa-solid fa-lock" style="color:var(--muted)"></i>'}
+    </div>`;
+  }).join('');
+}
+
+window.calcRubric = function() {
+  const dec = Math.max(1, Math.min(4, parseInt(document.getElementById('rDec').value) || 1));
+  const pat = Math.max(1, Math.min(4, parseInt(document.getElementById('rPat').value) || 1));
+  const abs = Math.max(1, Math.min(4, parseInt(document.getElementById('rAbs').value) || 1));
+  const alg = Math.max(1, Math.min(4, parseInt(document.getElementById('rAlg').value) || 1));
+  const total = dec + pat + abs + alg;
+  const final = Math.round(total / 16 * 100);
+  document.getElementById('rTotal').textContent = total;
+  document.getElementById('rFinal').textContent = final;
+  let pred = 'PERLU BIMBINGAN';
+  if (final >= 90) pred = 'SANGAT BAIK';
+  else if (final >= 80) pred = 'BAIK';
+  else if (final >= 70) pred = 'CUKUP';
+  document.getElementById('rPred').textContent = pred;
+};
+
+window.saveLKPD = function() { saveState(); toast('LKPD berhasil disimpan!', 'success'); };
+
+window.adminLogin = function() {
+  const u = document.getElementById('adminUser').value;
+  const p = document.getElementById('adminPass').value;
+  if (u === STATE.admin.user && p === STATE.admin.pass) {
+    STATE.admin.loggedIn = true;
+    document.getElementById('adminLoginPage').classList.add('hidden');
+    document.getElementById('adminDashboard').classList.remove('hidden');
+    renderStudents();
+    toast('Login berhasil! Selamat datang, Guru!', 'success');
+    playSound('success');
+    saveState();
+  } else {
+    toast('Username atau password salah!', 'error');
+    playSound('error');
+  }
+};
+window.adminLogout = function() {
+  STATE.admin.loggedIn = false;
+  document.getElementById('adminLoginPage').classList.remove('hidden');
+  document.getElementById('adminDashboard').classList.add('hidden');
+  document.getElementById('adminPass').value = '';
+  saveState();
+  toast('Anda telah logout', 'info');
+};
+
+function registerStudent() {
+  if (!STATE.player.name) return;
+  const nilai = calculateLKPDNilai();
+  const idx = STATE.students.findIndex(s => s.name === STATE.player.name && s.class === STATE.player.class);
+  const data = {
+    name: STATE.player.name, class: STATE.player.class, group: STATE.player.group,
+    xp: STATE.player.xp, score: STATE.player.score, lkpd: nilai,
+    nilaiAkhir: Math.round((STATE.player.xp / 1000 * 50 + nilai / 2)),
+    badge: STATE.player.badges.length, isMaster: STATE.player.completedWorlds.includes(5),
+    timestamp: Date.now()
+  };
+  if (idx >= 0) STATE.students[idx] = data;
+  else STATE.students.push(data);
+  saveState();
+}
+function calculateLKPDNilai() {
+  let score = 0;
+  const t = getLKPDData();
+  let filled = 0, total = 0;
+  Object.keys(t).forEach(k => { total++; if (t[k] && t[k].trim()) filled++; });
+  return Math.round(filled / total * 100);
+}
+window.renderStudents = function() {
+  const tbody = document.getElementById('studentTable');
+  const search = document.getElementById('searchStudent').value.toLowerCase();
+  const filterClass = document.getElementById('filterClass').value;
+  let filtered = STATE.students.filter(s => {
+    if (search && !s.name.toLowerCase().includes(search)) return false;
+    if (filterClass && s.class !== filterClass) return false;
+    return true;
+  });
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="text-center py-8" style="color:var(--muted)"><i class="fa-solid fa-database text-4xl mb-3 block"></i>Belum ada data siswa. Selesaikan game untuk merekam data!</td></tr>`;
+  } else {
+    tbody.innerHTML = filtered.map((s, i) => {
+      const pred = s.nilaiAkhir >= 90 ? 'Sangat Baik' : s.nilaiAkhir >= 80 ? 'Baik' : s.nilaiAkhir >= 70 ? 'Cukup' : 'Perlu Bimbingan';
+      const predColor = s.nilaiAkhir >= 90 ? 'var(--lime)' : s.nilaiAkhir >= 80 ? 'var(--cyan)' : s.nilaiAkhir >= 70 ? 'var(--gold)' : 'var(--pink)';
+      return `<tr>
+        <td>${i+1}</td><td><strong>${s.name}</strong></td><td>${s.class}</td><td>${s.group || '-'}</td>
+        <td style="color:var(--cyan);font-weight:700">${s.xp}</td><td style="color:var(--gold);font-weight:700">${s.lkpd}</td>
+        <td style="color:${predColor};font-weight:700">${s.nilaiAkhir}</td><td><span style="color:${predColor};font-weight:700">${pred}</span></td>
+        <td>${s.isMaster ? '👑' : ''} ${s.badge}/5</td>
+        <td><button onclick="deleteStudent('${s.name}','${s.class}')" class="text-xs px-2 py-1 rounded" style="background:rgba(255,45,117,0.15);color:var(--pink);border:1px solid var(--pink)"><i class="fa-solid fa-trash"></i></button></td>
+      </tr>`;
+    }).join('');
+  }
+  document.getElementById('tTotal').textContent = STATE.students.length;
+  document.getElementById('tAvgXP').textContent = STATE.students.length ? Math.round(STATE.students.reduce((a,s) => a + s.xp, 0) / STATE.students.length) : 0;
+  document.getElementById('tAvgNilai').textContent = STATE.students.length ? Math.round(STATE.students.reduce((a,s) => a + s.nilaiAkhir, 0) / STATE.students.length) : 0;
+  document.getElementById('tMaster').textContent = STATE.students.filter(s => s.isMaster).length;
+};
+window.deleteStudent = function(name, cls) {
+  if (!confirm(`Hapus data siswa ${name}?`)) return;
+  STATE.students = STATE.students.filter(s => !(s.name === name && s.class === cls));
+  saveState(); renderStudents(); toast('Data siswa dihapus', 'info');
+};
+window.addStudentModal = function() {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3 class="font-display font-black text-xl mb-4">Tambah Siswa Manual</h3>
+      <div class="space-y-3">
+        <input type="text" class="input-field" id="newName" placeholder="Nama siswa" />
+        <select class="input-field" id="newClass"><option value="">Pilih kelas</option><option>VII A</option><option>VII B</option><option>VII C</option><option>VII D</option><option>VII E</option><option>VII F</option></select>
+        <input type="text" class="input-field" id="newGroup" placeholder="Kelompok" />
+        <input type="number" class="input-field" id="newXP" placeholder="XP" value="0" />
+        <input type="number" class="input-field" id="newNilai" placeholder="Nilai LKPD (0-100)" value="0" />
+        <div class="flex gap-2 justify-end pt-2">
+          <button class="btn-ghost" onclick="this.closest('.modal-overlay').remove()">Batal</button>
+          <button class="btn-neon" onclick="saveNewStudent()">Simpan</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('modal-root').appendChild(modal);
+};
+window.saveNewStudent = function() {
+  const name = document.getElementById('newName').value.trim();
+  const cls = document.getElementById('newClass').value;
+  if (!name || !cls) { toast('Nama dan kelas wajib diisi!', 'warning'); return; }
+  const xp = parseInt(document.getElementById('newXP').value) || 0;
+  const lkpd = parseInt(document.getElementById('newNilai').value) || 0;
+  STATE.students.push({ name, class: cls, group: document.getElementById('newGroup').value, xp, score: xp, lkpd, nilaiAkhir: Math.round(xp/1000*50 + lkpd/2), badge: 0, isMaster: false, timestamp: Date.now() });
+  saveState(); renderStudents();
+  document.querySelector('.modal-overlay').remove();
+  toast('Siswa ditambahkan!', 'success');
+};
+window.exportCSV = function() {
+  if (STATE.students.length === 0) { toast('Belum ada data untuk diexport', 'warning'); return; }
+  const headers = ['No','Nama','Kelas','Kelompok','XP','Nilai LKPD','Nilai Akhir','Predikat','Badge'];
+  const rows = STATE.students.map((s, i) => [i+1, s.name, s.class, s.group, s.xp, s.lkpd, s.nilaiAkhir, s.nilaiAkhir >= 90 ? 'Sangat Baik' : s.nilaiAkhir >= 80 ? 'Baik' : s.nilaiAkhir >= 70 ? 'Cukup' : 'Perlu Bimbingan', s.badge]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'data_siswa.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV berhasil diexport!', 'success');
+};
+window.printTeacher = function() { window.print(); };
+window.resetData = function() {
+  if (!confirm('Reset SEMUA data siswa? Tindakan ini tidak dapat dibatalkan!')) return;
+  STATE.students = []; saveState(); renderStudents(); toast('Data siswa direset', 'info');
+};
+
+function confetti(count = 100) {
+  const canvas = document.getElementById('confetti');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#00e5ff', '#ff2d75', '#39ff14', '#ffd700', '#b14dff', '#ff6b35'];
+  const particles = [];
+  for (let i = 0; i < count; i++) {
+    particles.push({
+      x: Math.random() * canvas.width, y: -20,
+      vx: (Math.random() - 0.5) * 6, vy: Math.random() * 3 + 2,
+      size: Math.random() * 8 + 4, color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360, vr: (Math.random() - 0.5) * 10
+    });
+  }
+  let frame = 0;
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.1; p.rotation += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rotation * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.6);
+      ctx.restore();
+    });
+    frame++;
+    if (frame < 200) requestAnimationFrame(animate);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  animate();
+}
+
+function initParticles() {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
+      size: Math.random() * 2 + 0.5,
+      color: ['#00e5ff', '#ff2d75', '#39ff14', '#b14dff'][Math.floor(Math.random() * 4)],
+      alpha: Math.random() * 0.6 + 0.2
+    });
+  }
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = canvas.width;
+      if (p.x > canvas.width) p.x = 0;
+      if (p.y < 0) p.y = canvas.height;
+      if (p.y > canvas.height) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = p.color;
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+function initThree() {
+  try {
+    const container = document.getElementById('three-bg');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+    const shapes = [];
+    const geoms = [new THREE.BoxGeometry(1,1,1), new THREE.OctahedronGeometry(0.7), new THREE.IcosahedronGeometry(0.7), new THREE.TetrahedronGeometry(0.8), new THREE.TorusGeometry(0.5,0.2,8,16)];
+    const colors = [0x00e5ff, 0xff2d75, 0x39ff14, 0xb14dff, 0xffd700];
+    for (let i = 0; i < 25; i++) {
+      const geom = geoms[Math.floor(Math.random() * geoms.length)];
+      const mat = new THREE.MeshBasicMaterial({ color: colors[i % colors.length], wireframe: true, transparent: true, opacity: 0.4 });
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.position.set((Math.random() - 0.5) * 30, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20 - 5);
+      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      mesh.userData = { rx: (Math.random()-0.5)*0.01, ry: (Math.random()-0.5)*0.01, rz: (Math.random()-0.5)*0.01, floatSpeed: Math.random()*0.005+0.001, floatRange: Math.random()*2+1, originalY: mesh.position.y, phase: Math.random()*Math.PI*2 };
+      scene.add(mesh);
+      shapes.push(mesh);
+    }
+    camera.position.z = 12;
+    let mouseX = 0, mouseY = 0;
+    window.addEventListener('mousemove', e => { mouseX = (e.clientX / window.innerWidth - 0.5) * 2; mouseY = (e.clientY / window.innerHeight - 0.5) * 2; });
+    window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    let t = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      t += 0.01;
+      shapes.forEach(s => { s.rotation.x += s.userData.rx; s.rotation.y += s.userData.ry; s.rotation.z += s.userData.rz; s.position.y = s.userData.originalY + Math.sin(t + s.userData.phase) * s.userData.floatRange; });
+      camera.position.x += (mouseX * 2 - camera.position.x) * 0.05;
+      camera.position.y += (-mouseY * 2 - camera.position.y) * 0.05;
+      camera.lookAt(0, 0, 0);
+      renderer.render(scene, camera);
+    }
+    animate();
+  } catch(e) {}
+}
+
+// INIT
+loadState();
+document.documentElement.classList.toggle('light', !STATE.settings.dark);
+document.documentElement.classList.toggle('dark', STATE.settings.dark);
+document.getElementById('darkIcon').className = STATE.settings.dark ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+document.getElementById('soundIcon').className = STATE.settings.sound ? 'fa-solid fa-volume-high' : 'fa-solid fa-volume-xmark';
+updatePlayerUI();
+switchMateriTab('dec');
+initParticles();
+initThree();
+
+const today = new Date().toISOString().split('T')[0];
+const dateEl = document.getElementById('lkpdDate');
+if (dateEl) dateEl.value = today;
+
+setTimeout(() => toast('Selamat datang di Computational City! Klik MULAI PETUALANGAN untuk memulai.', 'info', 5000), 800);
+</script>
+</body>
+</html>
